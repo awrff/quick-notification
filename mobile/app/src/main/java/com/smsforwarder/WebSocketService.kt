@@ -34,18 +34,25 @@ class WebSocketService : Service() {
         private var currentServerAddress: String? = null
         private val reconnectHandler = Handler(Looper.getMainLooper())
         private var isConnected = false
+        private var retryCount = 0
+        private const val MAX_RETRIES = 3
+        private var isConnecting = false
     }
     
     private val gson = Gson()
     
     private val reconnectRunnable = object : Runnable {
         override fun run() {
-            if (!isConnected && currentServerAddress != null) {
-                Log.d(TAG, "尝试重新连接...")
-                MainActivity.messageLogCallback?.invoke("尝试重新连接...")
+            if (!isConnected && currentServerAddress != null && retryCount < MAX_RETRIES && !isConnecting) {
+                retryCount++
+                Log.d(TAG, "尝试重新连接 ($retryCount/$MAX_RETRIES)...")
+                MainActivity.messageLogCallback?.invoke("尝试重新连接 ($retryCount/$MAX_RETRIES)...")
                 connectToServer(currentServerAddress!!)
+            } else if (retryCount >= MAX_RETRIES) {
+                Log.d(TAG, "重试次数已达上限，停止自动重试")
+                MainActivity.messageLogCallback?.invoke("重试次数已达上限，请手动重新连接")
+                MainActivity.connectionStateCallback?.invoke(false)
             }
-            reconnectHandler.postDelayed(this, 5000)
         }
     }
     
@@ -62,6 +69,7 @@ class WebSocketService : Service() {
                 val serverAddress = intent.getStringExtra(EXTRA_SERVER_ADDRESS)
                 if (serverAddress != null) {
                     currentServerAddress = serverAddress
+                    retryCount = 0
                     connectToServer(serverAddress)
                     reconnectHandler.postDelayed(reconnectRunnable, 5000)
                 }
@@ -132,12 +140,16 @@ class WebSocketService : Service() {
             
             webSocketClient?.close()
             webSocketClient = null
+            isConnecting = true
             
             webSocketClient = object : WebSocketClient(uri) {
                 override fun onOpen(handshakedata: ServerHandshake?) {
                     Log.d(TAG, "WebSocket已打开 - HTTP状态: ${handshakedata?.httpStatus}")
                     isConnected = true
+                    isConnecting = false
+                    retryCount = 0
                     MainActivity.messageLogCallback?.invoke("已连接到服务器")
+                    MainActivity.connectionStateCallback?.invoke(true)
                     
                     while (messageQueue.isNotEmpty()) {
                         val msg = messageQueue.poll()
@@ -153,13 +165,17 @@ class WebSocketService : Service() {
                 override fun onClose(code: Int, reason: String?, remote: Boolean) {
                     Log.d(TAG, "连接关闭 - code: $code, reason: $reason, remote: $remote")
                     isConnected = false
+                    isConnecting = false
                     MainActivity.messageLogCallback?.invoke("连接关闭: $reason (code: $code)")
+                    MainActivity.connectionStateCallback?.invoke(false)
                 }
                 
                 override fun onError(ex: Exception?) {
                     Log.e(TAG, "连接错误", ex)
                     isConnected = false
+                    isConnecting = false
                     MainActivity.messageLogCallback?.invoke("连接错误: ${ex?.javaClass?.simpleName} - ${ex?.message}")
+                    MainActivity.connectionStateCallback?.invoke(false)
                 }
             }
             
@@ -169,7 +185,9 @@ class WebSocketService : Service() {
         } catch (e: Exception) {
             Log.e(TAG, "连接失败", e)
             isConnected = false
+            isConnecting = false
             MainActivity.messageLogCallback?.invoke("连接失败: ${e.message}")
+            MainActivity.connectionStateCallback?.invoke(false)
         }
     }
     

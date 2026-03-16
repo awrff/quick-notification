@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val PERMISSION_REQUEST_CODE = 100
         var messageLogCallback: ((String) -> Unit)? = null
+        var connectionStateCallback: ((Boolean) -> Unit)? = null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +44,20 @@ class MainActivity : AppCompatActivity() {
         messageLogCallback = { message ->
             runOnUiThread {
                 tvMessageLog.append("$message\n")
+            }
+        }
+        
+        connectionStateCallback = { isConnected ->
+            runOnUiThread {
+                if (isConnected) {
+                    tvStatus.text = "已连接"
+                    btnConnect.text = "断开连接"
+                    btnConnect.isEnabled = true
+                } else {
+                    tvStatus.text = "未连接"
+                    btnConnect.text = "连接服务器"
+                    btnConnect.isEnabled = true
+                }
             }
         }
     }
@@ -73,26 +88,33 @@ class MainActivity : AppCompatActivity() {
     
     private fun setupListeners() {
         btnConnect.setOnClickListener {
-            val serverAddress = etServerAddress.text.toString().trim()
-            if (serverAddress.isEmpty()) {
-                Toast.makeText(this, "请输入服务器地址", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            
-            val intent = Intent(this, WebSocketService::class.java).apply {
-                action = WebSocketService.ACTION_CONNECT
-                putExtra(WebSocketService.EXTRA_SERVER_ADDRESS, serverAddress)
-            }
-            
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(intent)
+            if (btnConnect.text == "连接服务器") {
+                val serverAddress = etServerAddress.text.toString().trim()
+                if (serverAddress.isEmpty()) {
+                    Toast.makeText(this, "请输入服务器地址", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                
+                val intent = Intent(this, WebSocketService::class.java).apply {
+                    action = WebSocketService.ACTION_CONNECT
+                    putExtra(WebSocketService.EXTRA_SERVER_ADDRESS, serverAddress)
+                }
+                
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(intent)
+                } else {
+                    startService(intent)
+                }
+                
+                tvStatus.text = "正在连接: $serverAddress"
+                btnConnect.text = "连接中..."
+                btnConnect.isEnabled = false
             } else {
-                startService(intent)
+                // 断开连接
+                stopService(Intent(this, WebSocketService::class.java))
+                tvStatus.text = "已断开连接"
+                btnConnect.text = "连接服务器"
             }
-            
-            tvStatus.text = "正在连接: $serverAddress"
-            btnConnect.text = "已连接"
-            btnConnect.isEnabled = false
         }
     }
     
@@ -103,14 +125,11 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_REQUEST_CODE) {
-            val allGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
-            if (!allGranted) {
-                Toast.makeText(this, "需要短信权限才能转发短信", Toast.LENGTH_LONG).show()
+            if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                Toast.makeText(this, "权限已授予", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "权限被拒绝，应用可能无法正常工作", Toast.LENGTH_SHORT).show()
             }
         }
-    }
-    
-    fun updateStatus(status: String) {
-        tvStatus.text = status
     }
 }

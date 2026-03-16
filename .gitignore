@@ -15,6 +15,13 @@
 .cxx
 local.properties
 
+# Android Studio project files
+mobile/.idea/
+mobile/build/
+mobile/app/build/
+mobile/app/.cxx/
+mobile/app/.externalNativeBuild/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -38,6 +45,13 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# Python project files
+pc/.venv/
+pc/__pycache__/
+pc/build/
+pc/dist/
+pc/*.egg-info/
 
 # PyInstaller
 *.manifest
