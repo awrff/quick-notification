@@ -15,7 +15,6 @@ import com.google.gson.Gson
 import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
 import java.net.URI
-import java.util.concurrent.ConcurrentLinkedQueue
 
 class WebSocketService : Service() {
     
@@ -31,7 +30,6 @@ class WebSocketService : Service() {
         private const val TAG = "WebSocketService"
         
         private var webSocketClient: WebSocketClient? = null
-        private val messageQueue = ConcurrentLinkedQueue<String>()
         private var currentServerAddress: String? = null
         private val reconnectHandler = Handler(Looper.getMainLooper())
         private var isConnected = false
@@ -169,12 +167,6 @@ class WebSocketService : Service() {
                     retryCount = 0
                     MainActivity.messageLogCallback?.invoke("已连接到服务器")
                     MainActivity.connectionStateCallback?.invoke(true)
-                    
-                    while (messageQueue.isNotEmpty()) {
-                        val msg = messageQueue.poll()
-                        send(msg)
-                        Log.d(TAG, "发送队列消息: $msg")
-                    }
                 }
                 
                 override fun onMessage(message: String?) {
@@ -230,13 +222,11 @@ class WebSocketService : Service() {
                 MainActivity.messageLogCallback?.invoke("已转发短信")
             } catch (e: Exception) {
                 Log.e(TAG, "发送失败", e)
-                messageQueue.offer(message)
-                MainActivity.messageLogCallback?.invoke("发送失败，已加入队列")
+                MainActivity.messageLogCallback?.invoke("发送失败")
             }
         } else {
-            messageQueue.offer(message)
-            Log.d(TAG, "连接未就绪，消息已加入队列")
-            MainActivity.messageLogCallback?.invoke("连接未就绪，消息已加入队列")
+            Log.d(TAG, "未连接，消息已丢弃")
+            MainActivity.messageLogCallback?.invoke("未连接到服务器，消息已丢弃")
         }
     }
     
