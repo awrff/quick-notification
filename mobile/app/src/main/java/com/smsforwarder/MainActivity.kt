@@ -7,7 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -20,12 +20,13 @@ import java.nio.charset.StandardCharsets
 
 class MainActivity : AppCompatActivity() {
     
-    private lateinit var btnConnect: Button
+    private lateinit var btnConnect: ImageButton
     private lateinit var tvStatus: TextView
     private lateinit var tvMessageLog: TextView
     private val handler = Handler(Looper.getMainLooper())
     private var isScanning = false
     private var serverAddress: String? = null
+    private var isConnected = false
     
     companion object {
         const val PERMISSION_REQUEST_CODE = 100
@@ -47,23 +48,50 @@ class MainActivity : AppCompatActivity() {
         tvStatus = findViewById(R.id.tvStatus)
         tvMessageLog = findViewById(R.id.tvMessageLog)
         
+        updateButtonState(ButtonState.DISCONNECTED)
+        
         messageLogCallback = { message ->
             handler.post {
                 tvMessageLog.append("$message\n")
             }
         }
         
-        connectionStateCallback = { isConnected ->
+        connectionStateCallback = { connected ->
             handler.post {
-                if (isConnected) {
+                isConnected = connected
+                if (connected) {
                     tvStatus.text = "已连接"
-                    btnConnect.text = "断开连接"
-                    btnConnect.isEnabled = true
+                    updateButtonState(ButtonState.CONNECTED)
                 } else {
                     tvStatus.text = "未连接"
-                    btnConnect.text = "扫描服务器"
-                    btnConnect.isEnabled = true
+                    updateButtonState(ButtonState.DISCONNECTED)
                 }
+            }
+        }
+    }
+    
+    private enum class ButtonState {
+        DISCONNECTED,
+        SCANNING,
+        CONNECTED
+    }
+    
+    private fun updateButtonState(state: ButtonState) {
+        when (state) {
+            ButtonState.DISCONNECTED -> {
+                btnConnect.setImageResource(R.drawable.ic_connect)
+                btnConnect.setBackgroundResource(R.drawable.btn_connect_bg)
+                btnConnect.isEnabled = true
+            }
+            ButtonState.SCANNING -> {
+                btnConnect.setImageResource(R.drawable.ic_scanning)
+                btnConnect.setBackgroundResource(R.drawable.btn_scanning_bg)
+                btnConnect.isEnabled = false
+            }
+            ButtonState.CONNECTED -> {
+                btnConnect.setImageResource(R.drawable.ic_disconnect)
+                btnConnect.setBackgroundResource(R.drawable.btn_disconnect_bg)
+                btnConnect.isEnabled = true
             }
         }
     }
@@ -95,10 +123,10 @@ class MainActivity : AppCompatActivity() {
     
     private fun setupListeners() {
         btnConnect.setOnClickListener {
-            if (btnConnect.text == "扫描服务器") {
-                scanServers()
-            } else {
+            if (isConnected) {
                 disconnect()
+            } else {
+                scanServers()
             }
         }
     }
@@ -107,14 +135,13 @@ class MainActivity : AppCompatActivity() {
         if (isScanning) return
         
         isScanning = true
-        tvStatus.text = "正在扫描服务器..."
-        btnConnect.text = "扫描中..."
-        btnConnect.isEnabled = false
+        tvStatus.text = "正在扫描..."
+        updateButtonState(ButtonState.SCANNING)
         
         Thread {
             try {
                 val socket = DatagramSocket(12345)
-                socket.soTimeout = 10000 // 10秒超时
+                socket.soTimeout = 10000
                 
                 val buffer = ByteArray(1024)
                 val packet = DatagramPacket(buffer, buffer.size)
@@ -129,24 +156,28 @@ class MainActivity : AppCompatActivity() {
                             serverAddress = "$ip:$port"
                             
                             handler.post {
-                                tvStatus.text = "找到服务器: $serverAddress"
+                                tvStatus.text = "已连接"
                                 messageLogCallback?.invoke("找到服务器: $serverAddress")
                                 connectToServer(serverAddress!!)
                             }
                             break
                         }
                     } catch (e: Exception) {
-                        // 超时或错误，继续扫描
+                        handler.post {
+                            tvStatus.text = "扫描超时"
+                            messageLogCallback?.invoke("扫描超时，未找到服务器")
+                            updateButtonState(ButtonState.DISCONNECTED)
+                            isScanning = false
+                        }
                     }
                 }
                 
                 socket.close()
             } catch (e: Exception) {
                 handler.post {
-                    tvStatus.text = "扫描失败: ${e.message}"
+                    tvStatus.text = "扫描失败"
                     messageLogCallback?.invoke("扫描失败: ${e.message}")
-                    btnConnect.text = "扫描服务器"
-                    btnConnect.isEnabled = true
+                    updateButtonState(ButtonState.DISCONNECTED)
                     isScanning = false
                 }
             }
@@ -165,7 +196,8 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, WebSocketService::class.java)
         stopService(intent)
         tvStatus.text = "已断开连接"
-        btnConnect.text = "扫描服务器"
+        updateButtonState(ButtonState.DISCONNECTED)
+        isConnected = false
     }
     
     override fun onRequestPermissionsResult(
