@@ -104,7 +104,7 @@ uv pip install -e .
 quick-message
 ```
 
-启动后会显示现代GUI界面，WebSocket服务器随机分配端口并自动广播。
+启动后会显示GUI界面，WebSocket服务器随机分配端口并自动广播。
 
 ### 安卓端
 
@@ -213,53 +213,22 @@ quick-message
 
 ### Q: 安卓端无法找到PC服务器？
 1. 检查PC和手机是否在同一局域网
-2. 检查PC防火墙是否允许UDP端口12345和WebSocket端口
+2. 检查PC防火墙是否允许应用通信
 3. 确认PC端应用已启动
 
 ### Q: 收到短信但没有转发？
 1. 检查安卓端是否已连接服务器（状态显示"已连接"）
 2. 确认已授予短信权限
-3. 查看安卓端消息日志
-4. 注意：未连接时收到的短信会被丢弃，不会缓存
+3. 确保手机电池优化设置为"无限制"
+4. 确保已开启"通知类短信"权限（部分手机厂商需要）
+5. 查看安卓端消息日志
+6. 注意：未连接时收到的短信会被丢弃，不会缓存
 
 ### Q: 连接失败后如何重新连接？
 连接失败后按钮会自动恢复为连接状态，点击即可重新扫描
 
 ### Q: 如何查看历史短信？
 PC端默认开启短信保存功能，重启应用后会自动加载历史消息（保留30天）
-
-## 开发说明
-
-### 修改PC端广播端口
-编辑 `pc/src/sms_receiver/server.py`，修改广播端口：
-```python
-sock.sendto(data, ('255.255.255.255', 12345))
-```
-
-### 修改安卓端接收端口
-编辑 `mobile/app/src/main/java/com/smsforwarder/MainActivity.kt`，修改接收端口：
-```kotlin
-val socket = DatagramSocket(12345)
-```
-
-### 自定义重试次数
-编辑 `mobile/app/src/main/java/com/smsforwarder/WebSocketService.kt`，修改 `MAX_RETRIES` 常量：
-```kotlin
-private const val MAX_RETRIES = 3
-```
-
-### 自定义超时时间
-编辑 `mobile/app/src/main/java/com/smsforwarder/WebSocketService.kt`，修改 `connectionLostTimeout`：
-```kotlin
-webSocketClient?.connectionLostTimeout = 10
-```
-
-### 自定义消息保存天数
-编辑 `pc/src/sms_receiver/config.py`，修改 `MAX_DAYS` 常量：
-```python
-class MessageStorage:
-    MAX_DAYS = 30
-```
 
 ## 数据存储
 
