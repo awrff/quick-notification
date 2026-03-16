@@ -22,6 +22,7 @@ class WebSocketService : Service() {
     companion object {
         const val ACTION_CONNECT = "com.smsforwarder.CONNECT"
         const val ACTION_SEND_SMS = "com.smsforwarder.SEND_SMS"
+        const val ACTION_DISCONNECT = "com.smsforwarder.DISCONNECT"
         const val EXTRA_SERVER_ADDRESS = "server_address"
         const val EXTRA_SMS_DATA = "sms_data"
         
@@ -37,13 +38,14 @@ class WebSocketService : Service() {
         private var retryCount = 0
         private const val MAX_RETRIES = 3
         private var isConnecting = false
+        private var isUserInitiatedDisconnect = false
     }
     
     private val gson = Gson()
     
     private val reconnectRunnable = object : Runnable {
         override fun run() {
-            if (!isConnected && currentServerAddress != null && retryCount < MAX_RETRIES && !isConnecting) {
+            if (!isConnected && currentServerAddress != null && retryCount < MAX_RETRIES && !isConnecting && !isUserInitiatedDisconnect) {
                 retryCount++
                 Log.d(TAG, "尝试重新连接 ($retryCount/$MAX_RETRIES)...")
                 MainActivity.messageLogCallback?.invoke("尝试重新连接 ($retryCount/$MAX_RETRIES)...")
@@ -70,7 +72,7 @@ class WebSocketService : Service() {
                 if (serverAddress != null) {
                     currentServerAddress = serverAddress
                     retryCount = 0
-                    // 终止上一次连接
+                    isUserInitiatedDisconnect = false
                     webSocketClient?.close()
                     webSocketClient = null
                     isConnected = false
@@ -84,6 +86,18 @@ class WebSocketService : Service() {
                 if (smsData != null) {
                     sendMessage(smsData)
                 }
+            }
+            ACTION_DISCONNECT -> {
+                isUserInitiatedDisconnect = true
+                reconnectHandler.removeCallbacks(reconnectRunnable)
+                webSocketClient?.close()
+                webSocketClient = null
+                isConnected = false
+                isConnecting = false
+                currentServerAddress = null
+                retryCount = 0
+                MainActivity.messageLogCallback?.invoke("已断开连接")
+                MainActivity.connectionStateCallback?.invoke(false)
             }
         }
         return START_STICKY
@@ -143,7 +157,6 @@ class WebSocketService : Service() {
                 URI("ws://$serverAddress")
             }
             
-            // 确保终止上一次连接
             webSocketClient?.close()
             webSocketClient = null
             isConnecting = true
@@ -175,8 +188,7 @@ class WebSocketService : Service() {
                     MainActivity.messageLogCallback?.invoke("连接关闭: $reason (code: $code)")
                     MainActivity.connectionStateCallback?.invoke(false)
                     
-                    // 重新调度重试
-                    if (retryCount < MAX_RETRIES) {
+                    if (!isUserInitiatedDisconnect && retryCount < MAX_RETRIES) {
                         reconnectHandler.postDelayed(reconnectRunnable, 5000)
                     }
                 }
@@ -188,8 +200,7 @@ class WebSocketService : Service() {
                     MainActivity.messageLogCallback?.invoke("连接错误: ${ex?.javaClass?.simpleName} - ${ex?.message}")
                     MainActivity.connectionStateCallback?.invoke(false)
                     
-                    // 重新调度重试
-                    if (retryCount < MAX_RETRIES) {
+                    if (!isUserInitiatedDisconnect && retryCount < MAX_RETRIES) {
                         reconnectHandler.postDelayed(reconnectRunnable, 5000)
                     }
                 }
@@ -205,8 +216,7 @@ class WebSocketService : Service() {
             MainActivity.messageLogCallback?.invoke("连接失败: ${e.message}")
             MainActivity.connectionStateCallback?.invoke(false)
             
-            // 重新调度重试
-            if (retryCount < MAX_RETRIES) {
+            if (!isUserInitiatedDisconnect && retryCount < MAX_RETRIES) {
                 reconnectHandler.postDelayed(reconnectRunnable, 5000)
             }
         }

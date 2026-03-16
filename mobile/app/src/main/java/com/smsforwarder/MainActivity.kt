@@ -194,7 +194,8 @@ class MainActivity : AppCompatActivity() {
     
     private fun disconnect() {
         val intent = Intent(this, WebSocketService::class.java)
-        stopService(intent)
+        intent.action = WebSocketService.ACTION_DISCONNECT
+        startService(intent)
         tvStatus.text = "已断开连接"
         updateButtonState(ButtonState.DISCONNECTED)
         isConnected = false
