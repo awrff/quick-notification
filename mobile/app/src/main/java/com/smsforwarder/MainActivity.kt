@@ -3,13 +3,17 @@ package com.smsforwarder
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
+import android.provider.Settings
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -29,6 +33,10 @@ class MainActivity : AppCompatActivity() {
     private var serverAddress: String? = null
     private var isConnected = false
     
+    private val batteryOptimizationLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { }
+    
     companion object {
         const val PERMISSION_REQUEST_CODE = 100
         var messageLogCallback: ((String) -> Unit)? = null
@@ -41,6 +49,7 @@ class MainActivity : AppCompatActivity() {
         
         initViews()
         checkPermissions()
+        checkBatteryOptimization()
         setupListeners()
     }
     
@@ -122,6 +131,38 @@ class MainActivity : AppCompatActivity() {
                 missingPermissions.toTypedArray(),
                 PERMISSION_REQUEST_CODE
             )
+        }
+    }
+    
+    private fun checkBatteryOptimization() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+            val packageName = packageName
+            
+            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+                requestIgnoreBatteryOptimization()
+            }
+        }
+    }
+    
+    private fun requestIgnoreBatteryOptimization() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+            val packageName = packageName
+            
+            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+                try {
+                    val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                        data = Uri.parse("package:$packageName")
+                    }
+                    batteryOptimizationLauncher.launch(intent)
+                } catch (e: Exception) {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.parse("package:$packageName")
+                    }
+                    batteryOptimizationLauncher.launch(intent)
+                }
+            }
         }
     }
     

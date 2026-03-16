@@ -168,6 +168,7 @@ quick-message
 - [x] 主动断开不自动重连
 - [x] 深色/浅色主题自适应
 - [x] 未连接时丢弃消息（不缓存）
+- [x] 后台运行支持（忽略电池优化）
 
 ## 设置选项
 
@@ -191,6 +192,15 @@ quick-message
 | ACCESS_NETWORK_STATE | 网络状态检测 |
 | FOREGROUND_SERVICE | 前台服务运行 |
 | POST_NOTIFICATIONS | 显示通知 (Android 13+) |
+| WAKE_LOCK | 保持CPU唤醒，确保后台运行 |
+| REQUEST_IGNORE_BATTERY_OPTIMIZATIONS | 请求忽略电池优化 |
+
+### 电池优化设置
+
+为确保应用在后台稳定运行，建议在手机设置中关闭电池优化：
+1. 打开手机设置 → 应用管理 → Quick Message
+2. 找到"电池"或"耗电管理"选项
+3. 选择"无限制"或关闭电池优化
 
 ## 常见问题
 
