@@ -1,11 +1,12 @@
 [project]
-name = "sms-forwarder-pc"
+name = "quick-message-pc"
 version = "0.1.0"
-description = "PC端短信接收显示服务"
+description = "Quick Message PC端 - 短信接收显示桌面应用"
 requires-python = ">=3.10"
 dependencies = [
     "websockets>=12.0",
-    "textual>=0.47.0",
+    "customtkinter>=5.2.0",
+    "pillow>=10.0.0",
 ]
 
 [build-system]
@@ -13,7 +14,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project.scripts]
-sms-receiver = "sms_receiver:main"
+quick-message = "sms_receiver:main"
+
+[project.gui-scripts]
+quick-message-gui = "sms_receiver:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/sms_receiver"]
