@@ -70,6 +70,11 @@ class WebSocketService : Service() {
                 if (serverAddress != null) {
                     currentServerAddress = serverAddress
                     retryCount = 0
+                    // 终止上一次连接
+                    webSocketClient?.close()
+                    webSocketClient = null
+                    isConnected = false
+                    isConnecting = false
                     connectToServer(serverAddress)
                     reconnectHandler.postDelayed(reconnectRunnable, 5000)
                 }
@@ -138,6 +143,7 @@ class WebSocketService : Service() {
                 URI("ws://$serverAddress")
             }
             
+            // 确保终止上一次连接
             webSocketClient?.close()
             webSocketClient = null
             isConnecting = true
@@ -168,6 +174,11 @@ class WebSocketService : Service() {
                     isConnecting = false
                     MainActivity.messageLogCallback?.invoke("连接关闭: $reason (code: $code)")
                     MainActivity.connectionStateCallback?.invoke(false)
+                    
+                    // 重新调度重试
+                    if (retryCount < MAX_RETRIES) {
+                        reconnectHandler.postDelayed(reconnectRunnable, 5000)
+                    }
                 }
                 
                 override fun onError(ex: Exception?) {
@@ -176,10 +187,15 @@ class WebSocketService : Service() {
                     isConnecting = false
                     MainActivity.messageLogCallback?.invoke("连接错误: ${ex?.javaClass?.simpleName} - ${ex?.message}")
                     MainActivity.connectionStateCallback?.invoke(false)
+                    
+                    // 重新调度重试
+                    if (retryCount < MAX_RETRIES) {
+                        reconnectHandler.postDelayed(reconnectRunnable, 5000)
+                    }
                 }
             }
             
-            webSocketClient?.connectionLostTimeout = 30
+            webSocketClient?.connectionLostTimeout = 10
             webSocketClient?.connect()
             
         } catch (e: Exception) {
@@ -188,6 +204,11 @@ class WebSocketService : Service() {
             isConnecting = false
             MainActivity.messageLogCallback?.invoke("连接失败: ${e.message}")
             MainActivity.connectionStateCallback?.invoke(false)
+            
+            // 重新调度重试
+            if (retryCount < MAX_RETRIES) {
+                reconnectHandler.postDelayed(reconnectRunnable, 5000)
+            }
         }
     }
     
