@@ -2,19 +2,19 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_enabled="false">
         <shape android:shape="oval">
-            <solid android:color="#9E9E9E"/>
+            <solid android:color="@color/text_secondary"/>
             <size android:width="160dp" android:height="160dp"/>
         </shape>
     </item>
     <item android:state_pressed="true">
         <shape android:shape="oval">
-            <solid android:color="#E65100"/>
+            <solid android:color="@color/button_scanning_ripple"/>
             <size android:width="160dp" android:height="160dp"/>
         </shape>
     </item>
     <item>
         <shape android:shape="oval">
-            <solid android:color="#FF9800"/>
+            <solid android:color="@color/button_scanning_bg"/>
             <size android:width="160dp" android:height="160dp"/>
         </shape>
     </item>

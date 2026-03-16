@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -82,16 +83,19 @@ class MainActivity : AppCompatActivity() {
                 btnConnect.setImageResource(R.drawable.ic_connect)
                 btnConnect.setBackgroundResource(R.drawable.btn_connect_bg)
                 btnConnect.isEnabled = true
+                tvStatus.setTextColor(ResourcesCompat.getColor(resources, R.color.status_disconnected, null))
             }
             ButtonState.SCANNING -> {
                 btnConnect.setImageResource(R.drawable.ic_scanning)
                 btnConnect.setBackgroundResource(R.drawable.btn_scanning_bg)
                 btnConnect.isEnabled = false
+                tvStatus.setTextColor(ResourcesCompat.getColor(resources, R.color.status_scanning, null))
             }
             ButtonState.CONNECTED -> {
                 btnConnect.setImageResource(R.drawable.ic_disconnect)
                 btnConnect.setBackgroundResource(R.drawable.btn_disconnect_bg)
                 btnConnect.isEnabled = true
+                tvStatus.setTextColor(ResourcesCompat.getColor(resources, R.color.status_connected, null))
             }
         }
     }
