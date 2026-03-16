@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import socket
 from datetime import datetime
 from textual.app import App, ComposeResult
 from textual.containers import Container, VerticalScroll
@@ -70,13 +71,14 @@ class SMSReceiverApp(App):
     message_count = reactive(0)
     status = reactive("等待连接...")
     
-    def __init__(self, host: str = "0.0.0.0", port: int = 8765):
+    def __init__(self, host: str = "0.0.0.0", port: int = 0):
         super().__init__()
         self.host = host
-        self.port = port
+        self.port = port  # 0表示随机端口
         self.messages_container = None
         self.server = None
         self.pending_messages = []
+        self.broadcast_task = None
     
     def compose(self) -> ComposeResult:
         yield Header()
@@ -90,10 +92,6 @@ class SMSReceiverApp(App):
         self.run_worker(self.start_server(), name="server", exclusive=True)
     
     async def start_server(self):
-        logger.info(f"启动服务器 {self.host}:{self.port}")
-        self.status = f"服务器启动在 ws://{self.host}:{self.port}"
-        self._update_status_safe()
-        
         try:
             async with websockets.serve(
                 self.handle_connection,
@@ -101,12 +99,36 @@ class SMSReceiverApp(App):
                 self.port,
                 ping_interval=20,
                 ping_timeout=60
-            ):
+            ) as server:
+                self.port = server.sockets[0].getsockname()[1]
+                logger.info(f"服务器启动在 ws://{self.host}:{self.port}")
+                self.status = f"服务器启动在 ws://{self.host}:{self.port}"
+                self._update_status_safe()
+                
+                # 启动UDP广播
+                self.broadcast_task = asyncio.create_task(self.broadcast_port())
+                
                 await asyncio.Future()
         except Exception as e:
             logger.exception("服务器错误")
             self.status = f"服务器错误: {e}"
             self._update_status_safe()
+    
+    async def broadcast_port(self):
+        """UDP广播端口号"""
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            sock.settimeout(1)
+            
+            while True:
+                message = f"SMS_FORWARDER_PORT:{self.port}"
+                data = message.encode('utf-8')
+                sock.sendto(data, ('255.255.255.255', 12345))
+                logger.debug(f"广播端口: {self.port}")
+                await asyncio.sleep(5)
+        except Exception as e:
+            logger.error(f"广播失败: {e}")
     
     def _update_status_safe(self):
         try:
