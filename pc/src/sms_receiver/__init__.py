@@ -353,8 +353,15 @@ class SettingsWindow(ctk.CTkToplevel):
 
 
 class MessageCard(ctk.CTkFrame):
-    def __init__(self, master, sender: str, content: str, timestamp: str, **kwargs):
+    def __init__(self, master, sender: str, content: str, timestamp: str, 
+                 on_copy=None, on_delete=None, **kwargs):
         super().__init__(master, **kwargs)
+        
+        self.sender = sender
+        self.content = content
+        self.timestamp = timestamp
+        self.on_copy = on_copy
+        self.on_delete = on_delete
         
         self.configure(
             fg_color=("#F5F5F5", "#2D2D2D"),
@@ -362,38 +369,118 @@ class MessageCard(ctk.CTkFrame):
             border_width=0
         )
         
-        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=0)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=0)
         
-        header_frame = ctk.CTkFrame(self, fg_color="transparent")
-        header_frame.grid(row=0, column=0, sticky="ew", padx=12, pady=(12, 4))
-        header_frame.grid_columnconfigure(1, weight=1)
+        sender_frame = ctk.CTkFrame(self, fg_color="transparent")
+        sender_frame.grid(row=0, column=0, sticky="ns", padx=(12, 8), pady=12)
         
         sender_label = ctk.CTkLabel(
-            header_frame,
+            sender_frame,
             text=sender,
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color=("#1A73E8", "#4DA3FF")
+            text_color=("#1A73E8", "#4DA3FF"),
+            width=80,
+            anchor="w"
         )
         sender_label.grid(row=0, column=0, sticky="w")
         
         time_label = ctk.CTkLabel(
-            header_frame,
+            sender_frame,
             text=timestamp,
-            font=ctk.CTkFont(size=11),
-            text_color=("#666666", "#888888")
+            font=ctk.CTkFont(size=10),
+            text_color=("#666666", "#888888"),
+            width=80,
+            anchor="w"
         )
-        time_label.grid(row=0, column=1, sticky="e")
+        time_label.grid(row=1, column=0, sticky="w", pady=(2, 0))
         
         content_label = ctk.CTkLabel(
             self,
             text=content,
             font=ctk.CTkFont(size=13),
             text_color=("#333333", "#E0E0E0"),
-            wraplength=400,
+            wraplength=280,
             justify="left",
             anchor="w"
         )
-        content_label.grid(row=1, column=0, sticky="ew", padx=12, pady=(0, 12))
+        content_label.grid(row=0, column=1, sticky="ew", padx=8, pady=12)
+        
+        self.button_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.button_frame.grid(row=0, column=2, sticky="ns", padx=(8, 12), pady=12)
+        
+        self.copy_btn = ctk.CTkButton(
+            self.button_frame,
+            text="复制",
+            font=ctk.CTkFont(size=11),
+            fg_color="transparent",
+            text_color=("#1A73E8", "#4DA3FF"),
+            hover_color=("#E8F0FE", "#1A3A5C"),
+            width=50,
+            height=24,
+            corner_radius=6,
+            command=self._on_copy_click
+        )
+        self.copy_btn.grid(row=0, column=0, pady=(0, 4))
+        
+        self.delete_btn = ctk.CTkButton(
+            self.button_frame,
+            text="删除",
+            font=ctk.CTkFont(size=11),
+            fg_color="transparent",
+            text_color=("#E53935", "#FF6B6B"),
+            hover_color=("#FFEBEE", "#4A2020"),
+            width=50,
+            height=24,
+            corner_radius=6,
+            command=self._on_delete_click
+        )
+        self.delete_btn.grid(row=1, column=0)
+        
+        self.button_frame.grid_remove()
+        
+        self._hide_timer = None
+        
+        self.bind("<Enter>", self._on_enter)
+        self.bind("<Leave>", self._on_leave)
+        
+        for child in self.winfo_children():
+            child.bind("<Enter>", self._on_enter)
+            child.bind("<Leave>", self._on_leave)
+            if isinstance(child, ctk.CTkFrame):
+                for subchild in child.winfo_children():
+                    subchild.bind("<Enter>", self._on_enter)
+                    subchild.bind("<Leave>", self._on_leave)
+    
+    def _on_enter(self, event=None):
+        if self._hide_timer:
+            self.after_cancel(self._hide_timer)
+            self._hide_timer = None
+        self.button_frame.grid()
+    
+    def _on_leave(self, event=None):
+        if self._hide_timer:
+            self.after_cancel(self._hide_timer)
+        self._hide_timer = self.after(100, self._do_hide)
+    
+    def _do_hide(self):
+        self.button_frame.grid_remove()
+        self._hide_timer = None
+    
+    def _on_copy_click(self):
+        if self.on_copy:
+            self.on_copy(self.content)
+        else:
+            self.clipboard_clear()
+            self.clipboard_append(self.content)
+        
+        self.copy_btn.configure(text="已复制", state="disabled")
+        self.after(1000, lambda: self.copy_btn.configure(text="复制", state="normal"))
+    
+    def _on_delete_click(self):
+        if self.on_delete:
+            self.on_delete(self)
 
 
 class QuickMessageApp(ctk.CTk):
@@ -584,7 +671,18 @@ class QuickMessageApp(ctk.CTk):
             return
         
         def create_icon():
-            return PILImage.new('RGB', (64, 64), color='#1A73E8')
+            img = PILImage.new('RGBA', (64, 64), (0, 0, 0, 0))
+            from PIL import ImageDraw
+            draw = ImageDraw.Draw(img)
+            
+            draw.rounded_rectangle([8, 12, 56, 52], radius=8, fill='#1A73E8', outline='#1565C0', width=2)
+            
+            draw.polygon([(12, 16), (32, 32), (52, 16)], fill='#4DA3FF')
+            
+            draw.rectangle([16, 28, 48, 32], fill='#FFFFFF')
+            draw.rectangle([16, 36, 40, 40], fill='#FFFFFF')
+            
+            return img
         
         def on_show(icon, item):
             self.after(0, self._show_window)
@@ -598,6 +696,7 @@ class QuickMessageApp(ctk.CTk):
         )
         
         self.tray_icon = pystray.Icon("quick_message", create_icon(), "Quick Message", menu)
+        threading.Thread(target=self.tray_icon.run, daemon=True).start()
     
     def _show_window(self):
         self.is_hidden = False
@@ -608,8 +707,6 @@ class QuickMessageApp(ctk.CTk):
     def _hide_window(self):
         self.is_hidden = True
         self.withdraw()
-        if self.tray_icon and not self.tray_icon.visible:
-            threading.Thread(target=self.tray_icon.run, daemon=True).start()
     
     def _start_server(self):
         def run_server():
@@ -739,7 +836,9 @@ class QuickMessageApp(ctk.CTk):
             self.scrollable_frame,
             sender=sender,
             content=content,
-            timestamp=timestamp
+            timestamp=timestamp,
+            on_copy=self._copy_to_clipboard,
+            on_delete=self._delete_message
         )
         card.grid(row=self.message_count - 1, column=0, sticky="ew", pady=(0, 8))
         
@@ -763,6 +862,27 @@ class QuickMessageApp(ctk.CTk):
             justify="center"
         )
         self.empty_label.grid(row=0, column=0, pady=50)
+    
+    def _delete_message(self, card: MessageCard):
+        card.destroy()
+        
+        remaining_cards = [w for w in self.scrollable_frame.winfo_children() 
+                          if isinstance(w, MessageCard)]
+        self.message_count = len(remaining_cards)
+        self.count_label.configure(text=f"{self.message_count} 条消息")
+        
+        for i, c in enumerate(remaining_cards):
+            c.grid(row=i, column=0, sticky="ew", pady=(0, 8))
+        
+        if self.message_count == 0:
+            self.empty_label = ctk.CTkLabel(
+                self.scrollable_frame,
+                text="暂无消息\n\n请确保手机和电脑在同一网络下\n然后在手机端点击连接按钮",
+                font=ctk.CTkFont(size=13),
+                text_color=("#999999", "#666666"),
+                justify="center"
+            )
+            self.empty_label.grid(row=0, column=0, pady=50)
     
     def _on_closing(self):
         if self.config.minimize_to_tray and TRAY_AVAILABLE:
