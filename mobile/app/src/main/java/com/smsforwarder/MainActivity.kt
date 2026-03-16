@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets
 class MainActivity : AppCompatActivity() {
     
     private lateinit var btnConnect: ImageButton
+    private lateinit var btnSettings: ImageButton
     private lateinit var tvStatus: TextView
     private lateinit var tvMessageLog: TextView
     private val handler = Handler(Looper.getMainLooper())
@@ -55,6 +56,7 @@ class MainActivity : AppCompatActivity() {
     
     private fun initViews() {
         btnConnect = findViewById(R.id.btnConnect)
+        btnSettings = findViewById(R.id.btnSettings)
         tvStatus = findViewById(R.id.tvStatus)
         tvMessageLog = findViewById(R.id.tvMessageLog)
         
@@ -157,12 +159,20 @@ class MainActivity : AppCompatActivity() {
                     }
                     batteryOptimizationLauncher.launch(intent)
                 } catch (e: Exception) {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.parse("package:$packageName")
-                    }
-                    batteryOptimizationLauncher.launch(intent)
+                    openAppSettings()
                 }
             }
+        }
+    }
+    
+    private fun openAppSettings() {
+        try {
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.parse("package:$packageName")
+            }
+            batteryOptimizationLauncher.launch(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "无法打开设置页面", Toast.LENGTH_SHORT).show()
         }
     }
     
@@ -173,6 +183,10 @@ class MainActivity : AppCompatActivity() {
             } else {
                 scanServers()
             }
+        }
+        
+        btnSettings.setOnClickListener {
+            openAppSettings()
         }
     }
     
