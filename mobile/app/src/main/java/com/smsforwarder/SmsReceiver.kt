@@ -68,7 +68,7 @@ class SmsReceiver : BroadcastReceiver() {
         }
     }
     
-    private fun handleMmsData(context: Context, data: ByteArray) {
+    private fun handleMmsData(@Suppress("UNUSED_PARAMETER") context: Context, data: ByteArray) {
         try {
             Log.d(TAG, "收到MMS数据，长度: ${data.size}")
             // MMS处理逻辑
