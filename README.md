@@ -140,6 +140,34 @@ quick-message
    - 向安卓手机发送一条短信
    - PC端界面会自动显示短信内容
 
+## 打包分发
+
+### PC端打包
+
+```bash
+# 打包PC端（需要先创建虚拟环境并安装依赖）
+python build_pc.py
+```
+
+输出文件：`pc/dist/QuickMessage.exe`
+
+**前置条件：**
+```bash
+cd pc
+uv venv
+.venv\Scripts\activate
+uv pip install -e .
+```
+
+### Android端打包
+
+使用 Android Studio 构建 APK：
+
+1. 用 Android Studio 打开 `mobile` 目录
+2. 等待 Gradle 同步完成
+3. 菜单：Build → Build Bundle(s) / APK(s) → Build APK(s)
+4. APK 生成在 `mobile/app/build/outputs/apk/debug/`
+
 ## 功能特性
 
 ### PC端
