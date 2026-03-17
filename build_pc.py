@@ -65,13 +65,17 @@ def build_pc():
         print("PyInstaller已安装")
 
     print("\n[3/4] 开始打包...")
-    entry_point = pc_dir / "src" / "sms_receiver" / "__init__.py"
+    entry_point = pc_dir / "src" / "sms_receiver" / "main.py"
+    src_path = pc_dir / "src"
+    icon_path = get_project_root() / "assets" / "quick-message.ico"
 
     cmd = [
         str(venv_python), "-m", "PyInstaller",
         "--onefile",
         "--windowed",
         "--name", "QuickMessage",
+        "--paths", str(src_path),
+        "--icon", str(icon_path),
         "--distpath", str(pc_dir / "dist"),
         "--workpath", str(pc_dir / "build"),
         "--specpath", str(pc_dir),
