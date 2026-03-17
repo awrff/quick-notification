@@ -21,6 +21,7 @@ mobile/build/
 mobile/app/build/
 mobile/app/.cxx/
 mobile/app/.externalNativeBuild/
+mobile/app/tmp/
 mobile/app/src/main/res/xml/data_extraction_rules.xml
 
 # Python
