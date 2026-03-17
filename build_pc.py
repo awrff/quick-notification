@@ -68,6 +68,7 @@ def build_pc():
     entry_point = pc_dir / "src" / "sms_receiver" / "main.py"
     src_path = pc_dir / "src"
     icon_path = get_project_root() / "assets" / "quick-message.ico"
+    assets_path = get_project_root() / "assets"
 
     cmd = [
         str(venv_python), "-m", "PyInstaller",
@@ -76,6 +77,7 @@ def build_pc():
         "--name", "QuickMessage",
         "--paths", str(src_path),
         "--icon", str(icon_path),
+        "--add-data", f"{assets_path};assets",
         "--distpath", str(pc_dir / "dist"),
         "--workpath", str(pc_dir / "build"),
         "--specpath", str(pc_dir),

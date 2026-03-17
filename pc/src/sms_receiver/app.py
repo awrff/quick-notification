@@ -1,4 +1,5 @@
 import logging
+import sys
 import threading
 from typing import Optional, List
 
@@ -22,6 +23,15 @@ ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
 
+def get_icon_path():
+    from pathlib import Path
+    if getattr(sys, 'frozen', False):
+        base_path = Path(sys._MEIPASS)
+    else:
+        base_path = Path(__file__).parent.parent.parent.parent
+    return base_path / "assets" / "quick-message.ico"
+
+
 class QuickMessageApp(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -32,6 +42,8 @@ class QuickMessageApp(ctk.CTk):
         self.title("Quick Message")
         self.geometry("500x700")
         self.minsize(400, 500)
+        
+        self._set_window_icon()
         
         self._center_window()
         
@@ -71,6 +83,14 @@ class QuickMessageApp(ctk.CTk):
         y = (screen_height - window_height) // 2
         
         self.geometry(f"{window_width}x{window_height}+{x}+{y}")
+    
+    def _set_window_icon(self):
+        try:
+            icon_path = get_icon_path()
+            if icon_path.exists():
+                self.iconbitmap(str(icon_path))
+        except Exception as e:
+            logger.warning(f"无法加载窗口图标: {e}")
     
     def _setup_ui(self):
         self.grid_columnconfigure(0, weight=1)
@@ -234,19 +254,11 @@ class QuickMessageApp(ctk.CTk):
         if not TRAY_AVAILABLE:
             return
         
-        def create_icon():
-            img = PILImage.new('RGBA', (64, 64), (0, 0, 0, 0))
-            from PIL import ImageDraw
-            draw = ImageDraw.Draw(img)
-            
-            draw.rounded_rectangle([8, 12, 56, 52], radius=8, fill='#1A73E8', outline='#1565C0', width=2)
-            
-            draw.polygon([(12, 16), (32, 32), (52, 16)], fill='#4DA3FF')
-            
-            draw.rectangle([16, 28, 48, 32], fill='#FFFFFF')
-            draw.rectangle([16, 36, 40, 40], fill='#FFFFFF')
-            
-            return img
+        icon_path = get_icon_path()
+        if not icon_path.exists():
+            return
+        
+        icon = PILImage.open(icon_path)
         
         def on_show(icon, item):
             self.after(0, self._show_window)
@@ -259,7 +271,7 @@ class QuickMessageApp(ctk.CTk):
             pystray.MenuItem("退出", on_exit)
         )
         
-        self.tray_icon = pystray.Icon("quick_message", create_icon(), "Quick Message", menu)
+        self.tray_icon = pystray.Icon("quick_message", icon, "Quick Message", menu)
         threading.Thread(target=self.tray_icon.run, daemon=True).start()
     
     def _show_window(self):
