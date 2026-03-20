@@ -210,7 +210,7 @@ wheels = [
 ]
 
 [[package]]
-name = "quick-message-pc"
+name = "quick-notification-pc"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

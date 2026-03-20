@@ -1,4 +1,4 @@
-# Quick Message PC端打包说明
+# Quick Notification PC端打包说明
 
 ## 环境准备
 
@@ -33,8 +33,8 @@ python build_pc.py
 3. 使用 Inno Setup 生成安装程序
 
 生成的文件：
-- `pc/dist/QuickMessage.exe` - 可执行文件
-- `installer_output/QuickMessageSetup.exe` - 安装程序
+- `pc/dist/QuickNotification.exe` - 可执行文件
+- `installer_output/QuickNotificationSetup.exe` - 安装程序
 
 ### 方式二：只打包 exe（不生成安装程序）
 
@@ -48,7 +48,7 @@ python build_pc.py --skip-installer
 cd pc
 
 # 打包 exe
-.venv\Scripts\python.exe -m PyInstaller --clean --noconfirm QuickMessage.spec
+.venv\Scripts\python.exe -m PyInstaller --clean --noconfirm QuickNotification.spec
 
 # 生成安装程序（需要安装 Inno Setup）
 "C:\Program Files\Inno Setup 6\ISCC.exe" installer.iss
@@ -58,14 +58,14 @@ cd pc
 
 安装程序已配置为在卸载时自动清理用户配置文件：
 
-- 清理目录：`%USERPROFILE%\.quick-message`
+- 清理目录：`%USERPROFILE%\.quick-notification`
 - 清理文件：`config.json`、`messages.json`
 
 这是通过 Inno Setup 脚本中的以下配置实现的：
 
 ```iss
 [UninstallDelete]
-Type: filesandordirs; Name: "{userappdata}\.quick-message"
+Type: filesandordirs; Name: "{userappdata}\.quick-notification"
 
 [Code]
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
@@ -73,7 +73,7 @@ begin
   if CurUninstallStep = usUninstall then
   begin
     // 删除用户配置目录
-    DelTree(ExpandConstant('{userappdata}\.quick-message'), True, True, True);
+    DelTree(ExpandConstant('{userappdata}\.quick-notification'), True, True, True);
   end;
 end;
 ```
@@ -83,7 +83,7 @@ end;
 | 文件 | 说明 |
 |------|------|
 | `build_pc.py` | 主打包脚本 |
-| `pc/QuickMessage.spec` | PyInstaller 配置文件 |
+| `pc/QuickNotification.spec` | PyInstaller 配置文件 |
 | `pc/installer.iss` | Inno Setup 安装脚本 |
 
 ## 自定义配置
@@ -98,7 +98,7 @@ end;
 
 编辑 `pc/installer.iss`：
 ```iss
-DefaultDirName={autopf}\Quick Message
+DefaultDirName={autopf}\Quick Notification
 ```
 
 ### 添加开始菜单项
@@ -109,7 +109,7 @@ DefaultDirName={autopf}\Quick Message
 
 ### Q: 打包后运行报错找不到模块？
 
-确保 `QuickMessage.spec` 中的 `hiddenimports` 包含所有需要的模块。
+确保 `QuickNotification.spec` 中的 `hiddenimports` 包含所有需要的模块。
 
 ### Q: 安装程序中文乱码？
 
@@ -122,4 +122,4 @@ Name: "chinesesimplified"; MessagesFile: "compiler:Languages\ChineseSimplified.i
 ### Q: 卸载后配置文件还在？
 
 检查配置文件是否存储在其他位置。当前配置存储在：
-- `Path.home() / ".quick-message"` (即 `C:\Users\用户名\.quick-message`)
+- `Path.home() / ".quick-notification"` (即 `C:\Users\用户名\.quick-notification`)

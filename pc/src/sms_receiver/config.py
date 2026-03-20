@@ -7,7 +7,7 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-CONFIG_DIR = Path.home() / ".quick-message"
+CONFIG_DIR = Path.home() / ".quick-notification"
 CONFIG_FILE = CONFIG_DIR / "config.json"
 MESSAGES_FILE = CONFIG_DIR / "messages.json"
 

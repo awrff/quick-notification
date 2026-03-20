@@ -1,3 +1,3 @@
-from .app import main, QuickMessageApp
+from .app import main, QuickNotificationApp
 
-__all__ = ['main', 'QuickMessageApp']
+__all__ = ['main', 'QuickNotificationApp']

@@ -1,29 +1,29 @@
-; Quick Message 安装脚本 for Inno Setup
+; Quick Notification 安装脚本 for Inno Setup
 ; 版本: 0.1.0
 
 [Setup]
 AppId={{8A7C5D2E-1F3B-4A6D-9E8C-7B5F3A2D1E4F}
-AppName=Quick Message
+AppName=Quick Notification
 AppVersion=0.1.0
-AppVerName=Quick Message 0.1.0
-AppPublisher=Quick Message
-AppPublisherURL=https://github.com/yourusername/quick-message
-AppSupportURL=https://github.com/yourusername/quick-message
-AppUpdatesURL=https://github.com/yourusername/quick-message
-DefaultDirName={localappdata}\Programs\Quick Message
-DefaultGroupName=Quick Message
+AppVerName=Quick Notification 0.1.0
+AppPublisher=Quick Notification
+AppPublisherURL=https://github.com/yourusername/quick-notification
+AppSupportURL=https://github.com/yourusername/quick-notification
+AppUpdatesURL=https://github.com/yourusername/quick-notification
+DefaultDirName={localappdata}\Programs\Quick Notification
+DefaultGroupName=Quick Notification
 AllowNoIcons=yes
 OutputDir=..\installer_output
-OutputBaseFilename=QuickMessageSetup
-SetupIconFile=..\assets\quick-message.ico
+OutputBaseFilename=QuickNotificationSetup
+SetupIconFile=..\assets\quick-notification.ico
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
-UninstallDisplayIcon={app}\QuickMessage.exe
-UninstallDisplayName=Quick Message
+UninstallDisplayIcon={app}\QuickNotification.exe
+UninstallDisplayName=Quick Notification
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -33,25 +33,25 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce; OnlyBelowVersion: 6.1; Check: not IsAdminInstallMode
 
 [Files]
-Source: "dist\QuickMessage.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "dist\QuickNotification.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\Quick Message"; Filename: "{app}\QuickMessage.exe"
-Name: "{group}\{cm:ProgramOnTheWeb,Quick Message}"; Filename: "https://github.com/yourusername/quick-message"
-Name: "{group}\{cm:UninstallProgram,Quick Message}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\Quick Message"; Filename: "{app}\QuickMessage.exe"; Tasks: desktopicon
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\Quick Message"; Filename: "{app}\QuickMessage.exe"; Tasks: quicklaunchicon
+Name: "{group}\Quick Notification"; Filename: "{app}\QuickNotification.exe"
+Name: "{group}\{cm:ProgramOnTheWeb,Quick Notification}"; Filename: "https://github.com/yourusername/quick-notification"
+Name: "{group}\{cm:UninstallProgram,Quick Notification}"; Filename: "{uninstallexe}"
+Name: "{autodesktop}\Quick Notification"; Filename: "{app}\QuickNotification.exe"; Tasks: desktopicon
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\Quick Notification"; Filename: "{app}\QuickNotification.exe"; Tasks: quicklaunchicon
 
 [Run]
-Filename: "{app}\QuickMessage.exe"; Description: "{cm:LaunchProgram,Quick Message}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\QuickNotification.exe"; Description: "{cm:LaunchProgram,Quick Notification}"; Flags: nowait postinstall skipifsilent
 
 [Registry]
-Root: HKCU; Subkey: "Software\Quick Message"; ValueType: string; ValueName: "InstallPath"; ValueData: "{app}"; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Quick Message"; ValueType: string; ValueName: "Version"; ValueData: "0.1.0"
+Root: HKCU; Subkey: "Software\Quick Notification"; ValueType: string; ValueName: "InstallPath"; ValueData: "{app}"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Quick Notification"; ValueType: string; ValueName: "Version"; ValueData: "0.1.0"
 
 [UninstallDelete]
-Type: filesandordirs; Name: "{userdocs}\..\.quick-message"
+Type: filesandordirs; Name: "{userdocs}\..\.quick-notification"
 
 [Code]
 function InitializeSetup(): Boolean;
@@ -72,7 +72,7 @@ begin
   if CurUninstallStep = usUninstall then
   begin
     HomePath := ExpandConstant('{userdocs}\..');
-    ConfigPath := HomePath + '\.quick-message';
+    ConfigPath := HomePath + '\.quick-notification';
     if DirExists(ConfigPath) then
     begin
       DelTree(ConfigPath, True, True, True);

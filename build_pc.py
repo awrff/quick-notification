@@ -76,7 +76,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name="QuickMessage",
+    name="QuickNotification",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -89,10 +89,10 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=str(assets_path / "quick-message.ico"),
+    icon=str(assets_path / "quick-notification.ico"),
 )
 '''
-    spec_file = pc_dir / "QuickMessage.spec"
+    spec_file = pc_dir / "QuickNotification.spec"
     with open(spec_file, "w", encoding="utf-8") as f:
         f.write(spec_content)
     return spec_file
@@ -144,7 +144,7 @@ def build_exe(pc_dir: Path, project_root: Path) -> bool:
         print("打包失败!")
         return False
 
-    output_file = pc_dir / "dist" / "QuickMessage.exe"
+    output_file = pc_dir / "dist" / "QuickNotification.exe"
     if output_file.exists():
         file_size = output_file.stat().st_size / (1024 * 1024)
         print(f"输出文件: {output_file}")
@@ -184,7 +184,7 @@ def build_installer(pc_dir: Path, project_root: Path) -> bool:
 
     output_dir = project_root / "installer_output"
     if output_dir.exists():
-        installers = list(output_dir.glob("QuickMessageSetup*.exe"))
+        installers = list(output_dir.glob("QuickNotificationSetup*.exe"))
         if installers:
             installer = installers[0]
             file_size = installer.stat().st_size / (1024 * 1024)

@@ -29,17 +29,17 @@ def get_icon_path():
         base_path = Path(sys._MEIPASS)
     else:
         base_path = Path(__file__).parent.parent.parent.parent
-    return base_path / "assets" / "quick-message.ico"
+    return base_path / "assets" / "quick-notification.ico"
 
 
-class QuickMessageApp(ctk.CTk):
+class QuickNotificationApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         
         self.config = Config()
         self.message_storage = MessageStorage()
         
-        self.title("Quick Message")
+        self.title("Quick Notification")
         self.geometry("500x700")
         self.minsize(400, 500)
         
@@ -102,7 +102,7 @@ class QuickMessageApp(ctk.CTk):
         
         title_label = ctk.CTkLabel(
             header_frame,
-            text="Quick Message",
+            text="Quick Notification",
             font=ctk.CTkFont(size=24, weight="bold"),
             text_color=("#1A1A1A", "#FFFFFF")
         )
@@ -271,7 +271,7 @@ class QuickMessageApp(ctk.CTk):
             pystray.MenuItem("退出", on_exit)
         )
         
-        self.tray_icon = pystray.Icon("quick_message", icon, "Quick Message", menu)
+        self.tray_icon = pystray.Icon("quick_notification", icon, "Quick Notification", menu)
         threading.Thread(target=self.tray_icon.run, daemon=True).start()
     
     def _show_window(self):
@@ -426,7 +426,7 @@ class QuickMessageApp(ctk.CTk):
 
 
 def main():
-    app = QuickMessageApp()
+    app = QuickNotificationApp()
     app.mainloop()
 
 

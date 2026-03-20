@@ -1,11 +1,11 @@
-# Quick Message
+# Quick Notification
 
 一个跨平台短信转发应用，支持安卓端自动捕获短信并转发到PC端显示。
 
 ## 项目结构
 
 ```
-quick-otc/
+quick-notification/
 ├── pc/                              # PC端
 │   ├── pyproject.toml               # Python项目配置 (uv + hatch)
 │   └── src/sms_receiver/
@@ -101,7 +101,7 @@ source .venv/bin/activate
 uv pip install -e .
 
 # 运行应用
-quick-message
+quick-notification
 ```
 
 启动后会显示GUI界面，WebSocket服务器随机分配端口并自动广播。
@@ -130,7 +130,7 @@ quick-message
    - PC和安卓手机连接到同一个WiFi网络
 
 2. **自动扫描服务器**
-   - 打开"Quick Message"应用
+   - 打开"Quick Notification"应用
    - 主界面显示连接状态和连接按钮
    - 点击右上角日志按钮可查看消息日志
    - 点击圆形连接按钮
@@ -151,7 +151,7 @@ quick-message
 python build_pc.py
 ```
 
-输出文件：`pc/dist/QuickMessage.exe`
+输出文件：`pc/dist/QuickNotification.exe`
 
 **前置条件：**
 ```bash
@@ -229,7 +229,7 @@ uv pip install -e .
 ### 电池优化设置
 
 为确保应用在后台稳定运行，建议在手机设置中关闭电池优化：
-1. 打开手机设置 → 应用管理 → Quick Message
+1. 打开手机设置 → 应用管理 → Quick Notification
 2. 找到"电池"或"耗电管理"选项
 3. 选择"无限制"或关闭电池优化
 
@@ -264,8 +264,8 @@ PC端默认开启短信保存功能，重启应用后会自动加载历史消息
 ## 数据存储
 
 ### PC端
-- 配置文件: `~/.quick-message/config.json`
-- 消息记录: `~/.quick-message/messages.json`
+- 配置文件: `~/.quick-notification/config.json`
+- 消息记录: `~/.quick-notification/messages.json`
 
 ### 配置文件格式
 ```json
