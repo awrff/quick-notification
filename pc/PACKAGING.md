@@ -21,9 +21,10 @@ uv pip install -e .
 
 ### 方式一：一键打包（推荐）
 
-在项目根目录运行：
+在 pc 目录下运行：
 
 ```powershell
+cd pc
 python build_pc.py
 ```
 
@@ -34,11 +35,12 @@ python build_pc.py
 
 生成的文件：
 - `pc/dist/QuickNotification.exe` - 可执行文件
-- `installer_output/QuickNotificationSetup.exe` - 安装程序
+- `installer/QuickNotificationSetup.exe` - 安装程序
 
 ### 方式二：只打包 exe（不生成安装程序）
 
 ```powershell
+cd pc
 python build_pc.py --skip-installer
 ```
 
@@ -82,7 +84,7 @@ end;
 
 | 文件 | 说明 |
 |------|------|
-| `build_pc.py` | 主打包脚本 |
+| `pc/build_pc.py` | 主打包脚本 |
 | `pc/QuickNotification.spec` | PyInstaller 配置文件 |
 | `pc/installer.iss` | Inno Setup 安装脚本 |
 

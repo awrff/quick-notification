@@ -8,12 +8,17 @@
 quick-notification/
 ├── pc/                              # PC端
 │   ├── pyproject.toml               # Python项目配置 (uv + hatch)
+│   ├── build_pc.py                  # 打包脚本
+│   ├── installer.iss                # Inno Setup 安装脚本
 │   └── src/sms_receiver/
 │       ├── __init__.py              # 入口文件
 │       ├── app.py                   # 主应用逻辑
 │       ├── config.py                # 配置管理和消息存储
 │       ├── server.py                # WebSocket服务器
 │       └── ui.py                    # UI组件
+│
+├── installer/                       # 安装程序输出目录
+│   └── QuickNotificationSetup.exe
 │
 └── mobile/                          # 安卓端
     ├── build.gradle.kts             # 根项目配置
@@ -147,11 +152,15 @@ quick-notification
 ### PC端打包
 
 ```bash
+cd pc
+
 # 打包PC端（需要先创建虚拟环境并安装依赖）
 python build_pc.py
 ```
 
-输出文件：`pc/dist/QuickNotification.exe`
+输出文件：
+- `pc/dist/QuickNotification.exe` - 可执行文件
+- `installer/QuickNotificationSetup.exe` - 安装程序
 
 **前置条件：**
 ```bash

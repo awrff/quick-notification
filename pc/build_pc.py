@@ -9,8 +9,12 @@ import argparse
 from pathlib import Path
 
 
-def get_project_root():
+def get_pc_dir():
     return Path(__file__).parent.resolve()
+
+
+def get_project_root():
+    return Path(__file__).parent.parent.resolve()
 
 
 def clean_build_files(pc_dir: Path):
@@ -182,7 +186,7 @@ def build_installer(pc_dir: Path, project_root: Path) -> bool:
         print("生成安装程序失败!")
         return False
 
-    output_dir = project_root / "installer_output"
+    output_dir = project_root / "installer"
     if output_dir.exists():
         installers = list(output_dir.glob("QuickNotificationSetup*.exe"))
         if installers:
@@ -198,7 +202,7 @@ def build_installer(pc_dir: Path, project_root: Path) -> bool:
 
 def build_pc(skip_installer: bool = False):
     """打包PC端"""
-    pc_dir = get_project_root() / "pc"
+    pc_dir = get_pc_dir()
     project_root = get_project_root()
 
     print("=" * 50)
