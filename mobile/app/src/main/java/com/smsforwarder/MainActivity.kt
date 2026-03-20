@@ -1,6 +1,9 @@
 package com.smsforwarder
 
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -9,9 +12,14 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.util.DisplayMetrics
+import android.view.LayoutInflater
+import android.view.WindowManager
 import android.widget.ImageButton
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -25,12 +33,14 @@ class MainActivity : AppCompatActivity() {
     
     private lateinit var btnConnect: ImageButton
     private lateinit var btnSettings: ImageButton
+    private lateinit var btnLog: ImageButton
     private lateinit var tvStatus: TextView
-    private lateinit var tvMessageLog: TextView
+    private val messageLog = StringBuilder()
     private val handler = Handler(Looper.getMainLooper())
     private var isScanning = false
     private var serverAddress: String? = null
     private var isConnected = false
+    private var logDialog: AlertDialog? = null
     
     companion object {
         const val PERMISSION_REQUEST_CODE = 100
@@ -50,14 +60,15 @@ class MainActivity : AppCompatActivity() {
     private fun initViews() {
         btnConnect = findViewById(R.id.btnConnect)
         btnSettings = findViewById(R.id.btnSettings)
+        btnLog = findViewById(R.id.btnLog)
         tvStatus = findViewById(R.id.tvStatus)
-        tvMessageLog = findViewById(R.id.tvMessageLog)
         
         updateButtonState(ButtonState.DISCONNECTED)
         
         messageLogCallback = { message ->
             handler.post {
-                tvMessageLog.append("$message\n")
+                messageLog.append("$message\n")
+                updateLogDialog()
             }
         }
         
@@ -73,6 +84,70 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+    
+    private fun updateLogDialog() {
+        if (logDialog?.isShowing == true) {
+            val tvDialogMessageLog = logDialog?.findViewById<TextView>(R.id.tvDialogMessageLog)
+            tvDialogMessageLog?.text = messageLog.toString()
+            val scrollView = logDialog?.findViewById<ScrollView>(R.id.scrollViewLog)
+            scrollView?.post { scrollView.fullScroll(ScrollView.FOCUS_DOWN) }
+        }
+    }
+    
+    private fun showLogDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_log, null)
+        val tvDialogMessageLog = dialogView.findViewById<TextView>(R.id.tvDialogMessageLog)
+        val btnCopyLog = dialogView.findViewById<ImageButton>(R.id.btnCopyLog)
+        val btnClose = dialogView.findViewById<android.widget.Button>(R.id.btnClose)
+        
+        tvDialogMessageLog.text = messageLog.toString()
+        
+        btnCopyLog.setOnClickListener {
+            copyLogToClipboard()
+        }
+        
+        btnClose.setOnClickListener {
+            logDialog?.dismiss()
+        }
+        
+        logDialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+        
+        logDialog?.setOnDismissListener {
+            logDialog = null
+        }
+        
+        logDialog?.show()
+        
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val screenHeight = displayMetrics.heightPixels
+        val screenWidth = displayMetrics.widthPixels
+        val dialogHeight = (screenHeight * 0.55).toInt()
+        val dialogWidth = (screenWidth * 0.9).toInt()
+        
+        logDialog?.window?.setLayout(
+            dialogWidth,
+            dialogHeight
+        )
+        
+        val scrollView = dialogView.findViewById<ScrollView>(R.id.scrollViewLog)
+        scrollView?.post { scrollView.fullScroll(ScrollView.FOCUS_DOWN) }
+    }
+    
+    private fun copyLogToClipboard() {
+        if (messageLog.isEmpty()) {
+            Toast.makeText(this, "日志为空", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("消息日志", messageLog.toString())
+        clipboard.setPrimaryClip(clip)
+        Toast.makeText(this, "日志已复制到剪贴板", Toast.LENGTH_SHORT).show()
     }
     
     private enum class ButtonState {
@@ -151,6 +226,10 @@ class MainActivity : AppCompatActivity() {
         
         btnSettings.setOnClickListener {
             openAppSettings()
+        }
+        
+        btnLog.setOnClickListener {
+            showLogDialog()
         }
     }
     
@@ -241,6 +320,7 @@ class MainActivity : AppCompatActivity() {
     
     override fun onDestroy() {
         isScanning = false
+        logDialog?.dismiss()
         super.onDestroy()
     }
 }

@@ -25,4 +25,7 @@
     <color name="log_background">#2D2D2D</color>
     <color name="log_text">#E0E0E0</color>
     <color name="log_label">#FFFFFF</color>
+    
+    <color name="icon_color">#B0B0B0</color>
+    <color name="button_text">#FFFFFF</color>
 </resources>

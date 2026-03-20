@@ -6,7 +6,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
+    android:clipChildren="false"
     tools:context=".MainActivity">
+
+    <ImageButton
+        android:id="@+id/btnLog"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="日志"
+        android:padding="12dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_log"
+        app:layout_constraintEnd_toStartOf="@id/btnSettings"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/btnSettings"
@@ -26,7 +41,8 @@
         android:id="@+id/connectionSection"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
+        android:clipChildren="false"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -37,8 +53,8 @@
             android:layout_height="wrap_content"
             android:text="未连接"
             android:textColor="@color/status_disconnected"
-            android:textSize="18sp"
-            android:textStyle="normal"
+            android:textSize="24sp"
+            android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@id/btnConnect"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -48,13 +64,13 @@
 
         <ImageButton
             android:id="@+id/btnConnect"
-            android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:layout_marginTop="20dp"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:layout_marginTop="32dp"
             android:background="@drawable/btn_connect_bg"
             android:contentDescription="连接按钮"
-            android:elevation="8dp"
-            android:padding="40dp"
+            android:elevation="12dp"
+            android:padding="55dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_connect"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -63,58 +79,5 @@
             app:layout_constraintTop_toBottomOf="@id/tvStatus" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardMessageLog"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="16dp"
-        app:cardBackgroundColor="@color/card_background"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/connectionSection">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:id="@+id/tvMessageLogLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="消息日志"
-                android:textColor="@color/log_label"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="12dp"
-                android:background="@color/log_background"
-                android:fadeScrollbars="false"
-                android:padding="12dp"
-                android:scrollbarStyle="insideOverlay">
-
-                <TextView
-                    android:id="@+id/tvMessageLog"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:lineSpacingExtra="4dp"
-                    android:textColor="@color/log_text"
-                    android:textSize="14sp" />
-
-            </ScrollView>
-
-        </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

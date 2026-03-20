@@ -11,5 +11,6 @@
         <item name="colorSurface">@color/surface</item>
         <item name="android:statusBarColor">@color/background</item>
         <item name="android:navigationBarColor">@color/background</item>
+        <item name="actionBarSize">64dp</item>
     </style>
 </resources>
