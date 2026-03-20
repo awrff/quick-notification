@@ -144,10 +144,14 @@ class MainActivity : AppCompatActivity() {
             return
         }
         
-        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText("消息日志", messageLog.toString())
-        clipboard.setPrimaryClip(clip)
-        Toast.makeText(this, "日志已复制到剪贴板", Toast.LENGTH_SHORT).show()
+        try {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("消息日志", messageLog.toString())
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(this, "日志已复制到剪贴板", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(this, "复制失败: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
     
     private enum class ButtonState {
