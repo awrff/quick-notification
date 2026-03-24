@@ -214,7 +214,8 @@ def extract_with_pattern(text: str, pattern: str, pattern_type: str) -> str:
                 if match.groups():
                     return match.group(1)
                 return match.group(0)
-        except re.error:
+        except re.error as e:
+            logger.error(f"正则表达式错误: {pattern}, 错误: {e}")
             pass
     return text
 
