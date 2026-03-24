@@ -33,6 +33,39 @@ def get_icon_path():
     return base_path / "assets" / "quick-notification.ico"
 
 
+def load_button_icon(icon_name: str, size: int = 20, color: tuple = (100, 100, 100)):
+    from pathlib import Path
+    from PIL import Image, ImageOps
+    
+    if getattr(sys, 'frozen', False):
+        base_path = Path(sys._MEIPASS)
+    else:
+        base_path = Path(__file__).parent.parent.parent.parent
+    
+    icon_path = base_path / "assets" / icon_name
+    if icon_path.exists():
+        try:
+            img = Image.open(icon_path).convert("RGBA")
+            
+            datas = img.getdata()
+            new_data = []
+            for item in datas:
+                if item[3] > 0:
+                    brightness = (item[0] + item[1] + item[2]) / 3
+                    if brightness < 128:
+                        new_data.append((color[0], color[1], color[2], item[3]))
+                    else:
+                        new_data.append(item)
+                else:
+                    new_data.append(item)
+            img.putdata(new_data)
+            
+            return ctk.CTkImage(img, size=(size, size))
+        except Exception:
+            pass
+    return None
+
+
 class QuickNotificationApp(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -116,7 +149,7 @@ class QuickNotificationApp(ctk.CTk):
         filter_btn = ctk.CTkButton(
             btn_frame,
             text="",
-            font=ctk.CTkFont(size=14),
+            image=load_button_icon("filter.png", 20, (136, 136, 136)),
             fg_color="transparent",
             text_color=("#666666", "#888888"),
             hover_color=("#EEEEEE", "#333333"),
@@ -127,15 +160,10 @@ class QuickNotificationApp(ctk.CTk):
         )
         filter_btn.grid(row=0, column=0, padx=(0, 4))
         
-        try:
-            filter_btn.configure(text="📄")
-        except:
-            filter_btn.configure(text="F")
-        
         settings_btn = ctk.CTkButton(
             btn_frame,
             text="",
-            font=ctk.CTkFont(size=14),
+            image=load_button_icon("settings.png", 20, (136, 136, 136)),
             fg_color="transparent",
             text_color=("#666666", "#888888"),
             hover_color=("#EEEEEE", "#333333"),
@@ -145,11 +173,6 @@ class QuickNotificationApp(ctk.CTk):
             command=self._show_settings
         )
         settings_btn.grid(row=0, column=1)
-        
-        try:
-            settings_btn.configure(text="⚙️")
-        except:
-            settings_btn.configure(text="S")
         
         status_frame = ctk.CTkFrame(
             self,
