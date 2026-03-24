@@ -647,7 +647,7 @@ class AddRuleDialog(ctk.CTkToplevel):
         
         copy_label = ctk.CTkLabel(
             form_frame,
-            text="拷贝规则（可选，默认整条拷贝）",
+            text="拷贝规则（可选）",
             font=ctk.CTkFont(size=12, weight="bold"),
             text_color=("#1A1A1A", "#FFFFFF"),
             anchor="w"
@@ -655,22 +655,23 @@ class AddRuleDialog(ctk.CTkToplevel):
         copy_label.grid(row=4, column=0, sticky="w", pady=(0, 4))
         
         copy_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
-        copy_frame.grid(row=5, column=0, sticky="ew", pady=(0, 12))
+        copy_frame.grid(row=5, column=0, sticky="ew", pady=(0, 8))
         copy_frame.grid_columnconfigure(1, weight=1)
         
-        self.copy_type_var = ctk.StringVar(value="keyword")
+        self.copy_type_var = ctk.StringVar(value="full")
         copy_type_seg = ctk.CTkSegmentedButton(
             copy_frame,
-            values=["keyword", "regex"],
+            values=["full", "regex"],
             variable=self.copy_type_var,
             height=36,
-            corner_radius=8
+            corner_radius=8,
+            command=self._on_copy_type_change
         )
         copy_type_seg.grid(row=0, column=0, padx=(0, 8))
         
         self.copy_entry = ctk.CTkEntry(
             copy_frame,
-            placeholder_text="留空则复制整条短信",
+            placeholder_text="输入正则表达式提取内容",
             height=36,
             corner_radius=8
         )
@@ -678,7 +679,7 @@ class AddRuleDialog(ctk.CTkToplevel):
         
         hint_label = ctk.CTkLabel(
             form_frame,
-            text="提示：正则表达式使用括号()标记需要提取的内容",
+            text="示例：验证码.*?(\\d{6}) 可从\"验证码是：123456\"中提取\"123456\"",
             font=ctk.CTkFont(size=11),
             text_color=("#666666", "#888888"),
             anchor="w"
@@ -716,8 +717,23 @@ class AddRuleDialog(ctk.CTkToplevel):
             self.name_entry.insert(0, self.rule.name)
             self.filter_entry.insert(0, self.rule.filter_pattern)
             self.filter_type_var.set(self.rule.filter_type)
-            self.copy_entry.insert(0, self.rule.copy_pattern)
-            self.copy_type_var.set(self.rule.copy_type)
+            copy_type = self.rule.copy_type if self.rule.copy_type in ["full", "regex"] else "full"
+            self.copy_type_var.set(copy_type)
+            if copy_type == "regex":
+                self.copy_entry.insert(0, self.rule.copy_pattern)
+        
+        self._update_copy_entry_state()
+    
+    def _on_copy_type_change(self, value):
+        self._update_copy_entry_state()
+    
+    def _update_copy_entry_state(self):
+        if self.copy_type_var.get() == "full":
+            self.copy_entry.configure(state="normal")
+            self.copy_entry.delete(0, "end")
+            self.copy_entry.configure(placeholder_text="当前模式将拷贝整条消息", state="disabled")
+        else:
+            self.copy_entry.configure(state="normal", placeholder_text="输入正则表达式提取内容")
     
     def _on_save(self):
         name = self.name_entry.get().strip()
@@ -731,13 +747,16 @@ class AddRuleDialog(ctk.CTkToplevel):
             self._show_error("请输入过滤规则")
             return
         
+        copy_type = self.copy_type_var.get()
+        copy_pattern = "" if copy_type == "full" else self.copy_entry.get().strip()
+        
         if self.on_save:
             self.on_save(
                 name=name,
                 filter_pattern=filter_pattern,
                 filter_type=self.filter_type_var.get(),
-                copy_pattern=self.copy_entry.get().strip(),
-                copy_type=self.copy_type_var.get()
+                copy_pattern=copy_pattern,
+                copy_type=copy_type
             )
         
         self.destroy()

@@ -203,12 +203,10 @@ def match_pattern(text: str, pattern: str, pattern_type: str) -> bool:
 
 
 def extract_with_pattern(text: str, pattern: str, pattern_type: str) -> str:
-    if not pattern:
+    if not pattern or pattern_type == "full":
         return text
     
-    if pattern_type == "keyword":
-        return pattern
-    elif pattern_type == "regex":
+    if pattern_type == "regex":
         try:
             match = re.search(pattern, text)
             if match:

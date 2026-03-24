@@ -159,7 +159,7 @@ class TestApplyFilter:
             filter_pattern="银行",
             filter_type="keyword",
             copy_pattern="",
-            copy_type="keyword",
+            copy_type="full",
             enabled=True,
             is_builtin=False
         )
@@ -207,7 +207,7 @@ class TestFilterRule:
             filter_pattern="测试",
             filter_type="keyword",
             copy_pattern="",
-            copy_type="keyword",
+            copy_type="full",
             enabled=True,
             is_builtin=False
         )
@@ -269,7 +269,7 @@ class TestFilterSettings:
             filter_pattern="测试",
             filter_type="keyword",
             copy_pattern="",
-            copy_type="keyword",
+            copy_type="full",
             enabled=True,
             is_builtin=False
         )
@@ -291,7 +291,7 @@ class TestFilterSettings:
             filter_pattern="测试",
             filter_type="keyword",
             copy_pattern="",
-            copy_type="keyword",
+            copy_type="full",
             enabled=True,
             is_builtin=False
         )
@@ -324,7 +324,7 @@ class TestFilterSettings:
             filter_pattern="测试",
             filter_type="keyword",
             copy_pattern="",
-            copy_type="keyword",
+            copy_type="full",
             enabled=True,
             is_builtin=False
         )
