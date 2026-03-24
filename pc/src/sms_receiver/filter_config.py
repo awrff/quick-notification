@@ -197,7 +197,8 @@ def match_pattern(text: str, pattern: str, pattern_type: str) -> bool:
     elif pattern_type == "regex":
         try:
             return bool(re.search(pattern, text))
-        except re.error:
+        except re.error as e:
+            logger.error(f"正则表达式错误: {pattern}, 错误: {e}")
             return False
     return False
 
