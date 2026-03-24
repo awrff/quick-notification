@@ -170,7 +170,8 @@ class SettingsWindow(ctk.CTkToplevel):
         self.title("设置")
         self.geometry("360x480")
         self.resizable(False, False)
-        self.attributes("-topmost", True)
+        
+        self.transient(master)
         
         self.configure(fg_color=("#FFFFFF", "#1F1F1F"))
         
@@ -553,11 +554,12 @@ class AddRuleDialog(ctk.CTkToplevel):
         self.title("编辑规则" if self.is_edit else "添加规则")
         self.geometry("400x420")
         self.resizable(False, False)
-        self.attributes("-topmost", True)
         self.transient(master)
         self.grab_set()
         
         self.configure(fg_color=("#FFFFFF", "#1F1F1F"))
+        
+        self._error_dialog = None
         
         self._setup_ui()
         self._center_window()
@@ -741,28 +743,48 @@ class AddRuleDialog(ctk.CTkToplevel):
         self.destroy()
     
     def _show_error(self, message: str):
-        error_dialog = ctk.CTkToplevel(self)
-        error_dialog.title("错误")
-        error_dialog.geometry("300x120")
-        error_dialog.resizable(False, False)
-        error_dialog.attributes("-topmost", True)
-        error_dialog.configure(fg_color=("#FFFFFF", "#1F1F1F"))
+        if self._error_dialog and self._error_dialog.winfo_exists():
+            self._error_dialog.destroy()
+        
+        self._error_dialog = ctk.CTkToplevel(self)
+        self._error_dialog.title("错误")
+        self._error_dialog.geometry("300x120")
+        self._error_dialog.resizable(False, False)
+        self._error_dialog.transient(self)
+        self._error_dialog.grab_set()
+        self._error_dialog.configure(fg_color=("#FFFFFF", "#1F1F1F"))
+        
+        self._center_error_dialog()
         
         error_label = ctk.CTkLabel(
-            error_dialog,
+            self._error_dialog,
             text=message,
             font=ctk.CTkFont(size=13),
-            text_color=("#E53935", "#FF6B6B")
+            text_color=("#333333", "#E0E0E0")
         )
         error_label.pack(pady=20)
         
         ok_btn = ctk.CTkButton(
-            error_dialog,
+            self._error_dialog,
             text="确定",
             width=80,
-            command=error_dialog.destroy
+            command=self._error_dialog.destroy
         )
         ok_btn.pack()
+    
+    def _center_error_dialog(self):
+        if not self._error_dialog:
+            return
+        
+        self._error_dialog.update_idletasks()
+        
+        dialog_width = 300
+        dialog_height = 120
+        
+        x = self.winfo_x() + (self.winfo_width() - dialog_width) // 2
+        y = self.winfo_y() + (self.winfo_height() - dialog_height) // 2
+        
+        self._error_dialog.geometry(f"{dialog_width}x{dialog_height}+{x}+{y}")
     
     def _on_close(self):
         self.destroy()
@@ -778,7 +800,8 @@ class FilterWindow(ctk.CTkToplevel):
         self.title("过滤设置")
         self.geometry("360x480")
         self.resizable(False, False)
-        self.attributes("-topmost", True)
+        
+        self.transient(master)
         
         self.configure(fg_color=("#FFFFFF", "#1F1F1F"))
         
