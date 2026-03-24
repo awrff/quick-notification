@@ -14,7 +14,8 @@ except ImportError:
 
 from .config import Config, SMSMessage, MessageStorage
 from .server import SMSServer
-from .ui import SMSPopup, SettingsWindow, MessageCard
+from .ui import SMSPopup, SettingsWindow, MessageCard, FilterWindow
+from .filter_config import FilterSettings, apply_filter
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,6 +39,7 @@ class QuickNotificationApp(ctk.CTk):
         
         self.config = Config()
         self.message_storage = MessageStorage()
+        self.filter_settings = FilterSettings()
         
         self.title("Quick Notification")
         self.geometry("500x700")
@@ -108,8 +110,30 @@ class QuickNotificationApp(ctk.CTk):
         )
         title_label.grid(row=0, column=0, sticky="w")
         
+        btn_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
+        btn_frame.grid(row=0, column=1)
+        
+        filter_btn = ctk.CTkButton(
+            btn_frame,
+            text="",
+            font=ctk.CTkFont(size=14),
+            fg_color="transparent",
+            text_color=("#666666", "#888888"),
+            hover_color=("#EEEEEE", "#333333"),
+            width=36,
+            height=36,
+            corner_radius=8,
+            command=self._show_filter
+        )
+        filter_btn.grid(row=0, column=0, padx=(0, 4))
+        
+        try:
+            filter_btn.configure(text="🔍")
+        except:
+            filter_btn.configure(text="F")
+        
         settings_btn = ctk.CTkButton(
-            header_frame,
+            btn_frame,
             text="",
             font=ctk.CTkFont(size=14),
             fg_color="transparent",
@@ -247,6 +271,12 @@ class QuickNotificationApp(ctk.CTk):
     def _show_settings(self):
         SettingsWindow(self, self.config, self._on_settings_saved)
     
+    def _show_filter(self):
+        FilterWindow(self, self.filter_settings, self._on_filter_saved)
+    
+    def _on_filter_saved(self):
+        pass
+    
     def _on_settings_saved(self):
         pass
     
@@ -285,6 +315,16 @@ class QuickNotificationApp(ctk.CTk):
         self.withdraw()
     
     def _on_new_message(self, sender: str, content: str, timestamp: str):
+        copy_content = content
+        
+        if self.filter_settings.filter_enabled:
+            rules = self.filter_settings.get_all_enabled_rules()
+            if rules:
+                should_show, extracted_content = apply_filter(content, rules)
+                if not should_show:
+                    return
+                copy_content = extracted_content
+        
         message = SMSMessage(sender=sender, content=content, timestamp=timestamp)
         
         if self.config.save_messages:
@@ -297,13 +337,13 @@ class QuickNotificationApp(ctk.CTk):
         
         auto_copied = False
         if self.config.auto_copy:
-            self.after(0, lambda c=content: self._copy_to_clipboard(c))
+            self.after(0, lambda c=copy_content: self._copy_to_clipboard(c))
             auto_copied = True
         
-        self.after(0, lambda: self._add_message_card(message, scroll_to_top=True))
+        self.after(0, lambda cc=copy_content: self._add_message_card(message, scroll_to_top=True, copy_content=cc))
         
         if self.config.popup_notification:
-            self.after(0, lambda: self._show_popup(sender, content, timestamp, auto_copied))
+            self.after(0, lambda: self._show_popup(sender, content, timestamp, auto_copied, copy_content))
     
     def _on_device_connected(self, device: str):
         self.connected_device = device
@@ -322,8 +362,10 @@ class QuickNotificationApp(ctk.CTk):
         self.clipboard_append(content)
         self.update()
     
-    def _show_popup(self, sender: str, content: str, timestamp: str, auto_copied: bool):
-        SMSPopup(self, sender, content, timestamp, auto_copied, on_dismiss_all=self._dismiss_all_popups)
+    def _show_popup(self, sender: str, content: str, timestamp: str, auto_copied: bool, copy_content: str = None):
+        if copy_content is None:
+            copy_content = content
+        SMSPopup(self, sender, content, timestamp, auto_copied, on_dismiss_all=self._dismiss_all_popups, copy_content=copy_content)
     
     def _dismiss_all_popups(self):
         pass
@@ -338,11 +380,14 @@ class QuickNotificationApp(ctk.CTk):
         color = "#4CAF50" if connected else ("#666666", "#888888")
         self.device_label.configure(text_color=color)
     
-    def _add_message_card(self, message: SMSMessage, scroll_to_top: bool = False):
+    def _add_message_card(self, message: SMSMessage, scroll_to_top: bool = False, copy_content: str = None):
         for widget in self.scrollable_frame.winfo_children():
             if isinstance(widget, MessageCard):
                 current_row = int(widget.grid_info().get('row', 0))
                 widget.grid(row=current_row + 1, column=0, sticky="ew", pady=(0, 8))
+        
+        if copy_content is None:
+            copy_content = message.content
         
         card = MessageCard(
             self.scrollable_frame,
@@ -350,7 +395,8 @@ class QuickNotificationApp(ctk.CTk):
             content=message.content,
             timestamp=message.timestamp,
             on_copy=self._copy_to_clipboard,
-            on_delete=self._delete_message
+            on_delete=self._delete_message,
+            copy_content=copy_content
         )
         card.grid(row=0, column=0, sticky="ew", pady=(0, 8))
         
