@@ -626,15 +626,14 @@ class AddRuleDialog(ctk.CTkToplevel):
         filter_frame.grid_columnconfigure(1, weight=1)
         
         self.filter_type_var = ctk.StringVar(value="keyword")
-        filter_type_menu = ctk.CTkOptionMenu(
+        filter_type_seg = ctk.CTkSegmentedButton(
             filter_frame,
             values=["keyword", "regex"],
             variable=self.filter_type_var,
-            width=80,
             height=36,
             corner_radius=8
         )
-        filter_type_menu.grid(row=0, column=0, padx=(0, 8))
+        filter_type_seg.grid(row=0, column=0, padx=(0, 8))
         
         self.filter_entry = ctk.CTkEntry(
             filter_frame,
@@ -658,15 +657,14 @@ class AddRuleDialog(ctk.CTkToplevel):
         copy_frame.grid_columnconfigure(1, weight=1)
         
         self.copy_type_var = ctk.StringVar(value="keyword")
-        copy_type_menu = ctk.CTkOptionMenu(
+        copy_type_seg = ctk.CTkSegmentedButton(
             copy_frame,
             values=["keyword", "regex"],
             variable=self.copy_type_var,
-            width=80,
             height=36,
             corner_radius=8
         )
-        copy_type_menu.grid(row=0, column=0, padx=(0, 8))
+        copy_type_seg.grid(row=0, column=0, padx=(0, 8))
         
         self.copy_entry = ctk.CTkEntry(
             copy_frame,
