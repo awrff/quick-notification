@@ -113,10 +113,6 @@ class TestMatchPattern:
 
 
 class TestExtractWithPattern:
-    def test_extract_with_pattern_keyword(self):
-        text = "验证码：123456"
-        assert extract_with_pattern(text, "123456", "keyword") == "123456"
-    
     def test_extract_with_pattern_regex_with_group(self):
         text = "验证码：123456"
         assert extract_with_pattern(text, r"验证码[是为：:\s]*(\d{4,8})", "regex") == "123456"
@@ -127,7 +123,7 @@ class TestExtractWithPattern:
     
     def test_extract_with_pattern_empty(self):
         text = "验证码：123456"
-        assert extract_with_pattern(text, "", "keyword") == text
+        assert extract_with_pattern(text, "", "full") == text
     
     def test_extract_with_pattern_no_match(self):
         text = "普通短信"
