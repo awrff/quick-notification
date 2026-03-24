@@ -478,39 +478,6 @@ class FilterRuleCard(ctk.CTkFrame):
         )
         name_label.grid(row=0, column=0, sticky="w")
         
-        desc_text = rule.description if len(rule.description) <= 80 else rule.description[:77] + "..."
-        desc_label = ctk.CTkLabel(
-            info_frame,
-            text=desc_text,
-            font=ctk.CTkFont(size=11),
-            text_color=("#666666", "#888888"),
-            anchor="w",
-            wraplength=250,
-            justify="left"
-        )
-        desc_label.grid(row=1, column=0, sticky="w", pady=(2, 0))
-        
-        type_frame = ctk.CTkFrame(info_frame, fg_color="transparent")
-        type_frame.grid(row=2, column=0, sticky="w", pady=(4, 0))
-        
-        filter_type_text = "关键字" if rule.filter_type == "keyword" else "正则"
-        filter_type_label = ctk.CTkLabel(
-            type_frame,
-            text=f"过滤: {filter_type_text}",
-            font=ctk.CTkFont(size=10),
-            text_color=("#999999", "#666666")
-        )
-        filter_type_label.grid(row=0, column=0, padx=(0, 8))
-        
-        copy_type_text = "关键字" if rule.copy_type == "keyword" else "正则"
-        copy_type_label = ctk.CTkLabel(
-            type_frame,
-            text=f"拷贝: {copy_type_text}",
-            font=ctk.CTkFont(size=10),
-            text_color=("#999999", "#666666")
-        )
-        copy_type_label.grid(row=0, column=1)
-        
         action_frame = ctk.CTkFrame(self, fg_color="transparent")
         action_frame.grid(row=0, column=1, sticky="ns", padx=(8, 12), pady=12)
         
@@ -584,9 +551,11 @@ class AddRuleDialog(ctk.CTkToplevel):
         self.is_edit = rule is not None
         
         self.title("编辑规则" if self.is_edit else "添加规则")
-        self.geometry("400x500")
+        self.geometry("400x420")
         self.resizable(False, False)
         self.attributes("-topmost", True)
+        self.transient(master)
+        self.grab_set()
         
         self.configure(fg_color=("#FFFFFF", "#1F1F1F"))
         
@@ -604,7 +573,7 @@ class AddRuleDialog(ctk.CTkToplevel):
         master_height = self.master.winfo_height()
         
         window_width = 400
-        window_height = 500
+        window_height = 420
         
         x = master_x + (master_width - window_width) // 2
         y = master_y + (master_height - window_height) // 2
@@ -654,7 +623,7 @@ class AddRuleDialog(ctk.CTkToplevel):
         
         filter_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
         filter_frame.grid(row=3, column=0, sticky="ew", pady=(0, 12))
-        filter_frame.grid_columnconfigure(0, weight=1)
+        filter_frame.grid_columnconfigure(1, weight=1)
         
         self.filter_type_var = ctk.StringVar(value="keyword")
         filter_type_menu = ctk.CTkOptionMenu(
@@ -686,7 +655,7 @@ class AddRuleDialog(ctk.CTkToplevel):
         
         copy_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
         copy_frame.grid(row=5, column=0, sticky="ew", pady=(0, 12))
-        copy_frame.grid_columnconfigure(0, weight=1)
+        copy_frame.grid_columnconfigure(1, weight=1)
         
         self.copy_type_var = ctk.StringVar(value="keyword")
         copy_type_menu = ctk.CTkOptionMenu(
@@ -707,23 +676,6 @@ class AddRuleDialog(ctk.CTkToplevel):
         )
         self.copy_entry.grid(row=0, column=1, sticky="ew")
         
-        desc_label = ctk.CTkLabel(
-            form_frame,
-            text="描述（可选）",
-            font=ctk.CTkFont(size=12, weight="bold"),
-            text_color=("#1A1A1A", "#FFFFFF"),
-            anchor="w"
-        )
-        desc_label.grid(row=6, column=0, sticky="w", pady=(0, 4))
-        
-        self.desc_entry = ctk.CTkEntry(
-            form_frame,
-            placeholder_text="输入规则描述",
-            height=36,
-            corner_radius=8
-        )
-        self.desc_entry.grid(row=7, column=0, sticky="ew", pady=(0, 12))
-        
         hint_label = ctk.CTkLabel(
             form_frame,
             text="提示：正则表达式使用括号()标记需要提取的内容",
@@ -731,7 +683,7 @@ class AddRuleDialog(ctk.CTkToplevel):
             text_color=("#666666", "#888888"),
             anchor="w"
         )
-        hint_label.grid(row=8, column=0, sticky="w", pady=(0, 12))
+        hint_label.grid(row=6, column=0, sticky="w", pady=(0, 12))
         
         button_frame = ctk.CTkFrame(self, fg_color="transparent")
         button_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=20)
@@ -766,7 +718,6 @@ class AddRuleDialog(ctk.CTkToplevel):
             self.filter_type_var.set(self.rule.filter_type)
             self.copy_entry.insert(0, self.rule.copy_pattern)
             self.copy_type_var.set(self.rule.copy_type)
-            self.desc_entry.insert(0, self.rule.description)
     
     def _on_save(self):
         name = self.name_entry.get().strip()
@@ -786,8 +737,7 @@ class AddRuleDialog(ctk.CTkToplevel):
                 filter_pattern=filter_pattern,
                 filter_type=self.filter_type_var.get(),
                 copy_pattern=self.copy_entry.get().strip(),
-                copy_type=self.copy_type_var.get(),
-                description=self.desc_entry.get().strip()
+                copy_type=self.copy_type_var.get()
             )
         
         self.destroy()
@@ -828,7 +778,7 @@ class FilterWindow(ctk.CTkToplevel):
         self.on_save = on_save
         
         self.title("过滤设置")
-        self.geometry("500x600")
+        self.geometry("360x480")
         self.resizable(False, False)
         self.attributes("-topmost", True)
         
@@ -847,8 +797,8 @@ class FilterWindow(ctk.CTkToplevel):
         master_width = self.master.winfo_width()
         master_height = self.master.winfo_height()
         
-        window_width = 500
-        window_height = 600
+        window_width = 360
+        window_height = 480
         
         x = master_x + (master_width - window_width) // 2
         y = master_y + (master_height - window_height) // 2
@@ -916,19 +866,7 @@ class FilterWindow(ctk.CTkToplevel):
         rules_frame = ctk.CTkFrame(self, fg_color="transparent")
         rules_frame.grid(row=2, column=0, sticky="nsew", padx=20, pady=(0, 12))
         rules_frame.grid_columnconfigure(0, weight=1)
-        rules_frame.grid_rowconfigure(1, weight=1)
-        
-        builtin_header = ctk.CTkFrame(rules_frame, fg_color="transparent")
-        builtin_header.grid(row=0, column=0, sticky="ew", pady=(0, 8))
-        builtin_header.grid_columnconfigure(0, weight=1)
-        
-        builtin_title = ctk.CTkLabel(
-            builtin_header,
-            text="内嵌规则",
-            font=ctk.CTkFont(size=14, weight="bold"),
-            text_color=("#1A1A1A", "#FFFFFF")
-        )
-        builtin_title.grid(row=0, column=0, sticky="w")
+        rules_frame.grid_rowconfigure(0, weight=1)
         
         self.scrollable_frame = ctk.CTkScrollableFrame(
             rules_frame,
@@ -936,7 +874,7 @@ class FilterWindow(ctk.CTkToplevel):
             scrollbar_button_color=("#CCCCCC", "#444444"),
             scrollbar_button_hover_color=("#AAAAAA", "#555555")
         )
-        self.scrollable_frame.grid(row=1, column=0, sticky="nsew")
+        self.scrollable_frame.grid(row=0, column=0, sticky="nsew")
         self.scrollable_frame.grid_columnconfigure(0, weight=1)
         
         self._refresh_rules()
@@ -1033,14 +971,14 @@ class FilterWindow(ctk.CTkToplevel):
             self.on_save()
     
     def _show_add_rule_dialog(self):
-        AddRuleDialog(self, on_save=self._on_add_rule)
+        self._add_rule_dialog = AddRuleDialog(self, on_save=self._on_add_rule)
     
-    def _on_add_rule(self, name, filter_pattern, filter_type, copy_pattern, copy_type, description):
+    def _on_add_rule(self, name, filter_pattern, filter_type, copy_pattern, copy_type):
         from .filter_config import FilterRule
         rule = FilterRule(
             id="",
             name=name,
-            description=description,
+            description="",
             filter_pattern=filter_pattern,
             filter_type=filter_type,
             copy_pattern=copy_pattern,
@@ -1054,14 +992,14 @@ class FilterWindow(ctk.CTkToplevel):
             self.on_save()
     
     def _on_edit_rule(self, rule):
-        AddRuleDialog(self, rule=rule, on_save=lambda **kwargs: self._on_update_rule(rule.id, **kwargs))
+        self._edit_rule_dialog = AddRuleDialog(self, rule=rule, on_save=lambda **kwargs: self._on_update_rule(rule.id, **kwargs))
     
-    def _on_update_rule(self, rule_id, name, filter_pattern, filter_type, copy_pattern, copy_type, description):
+    def _on_update_rule(self, rule_id, name, filter_pattern, filter_type, copy_pattern, copy_type):
         from .filter_config import FilterRule
         rule = FilterRule(
             id=rule_id,
             name=name,
-            description=description,
+            description="",
             filter_pattern=filter_pattern,
             filter_type=filter_type,
             copy_pattern=copy_pattern,

@@ -128,7 +128,7 @@ class QuickNotificationApp(ctk.CTk):
         filter_btn.grid(row=0, column=0, padx=(0, 4))
         
         try:
-            filter_btn.configure(text="🔍")
+            filter_btn.configure(text="📄")
         except:
             filter_btn.configure(text="F")
         
@@ -147,7 +147,7 @@ class QuickNotificationApp(ctk.CTk):
         settings_btn.grid(row=0, column=1)
         
         try:
-            settings_btn.configure(text="⚙")
+            settings_btn.configure(text="⚙️")
         except:
             settings_btn.configure(text="S")
         
@@ -269,10 +269,10 @@ class QuickNotificationApp(ctk.CTk):
         self.count_label.configure(text=f"{self.message_count} 条消息")
     
     def _show_settings(self):
-        SettingsWindow(self, self.config, self._on_settings_saved)
+        self._settings_window = SettingsWindow(self, self.config, self._on_settings_saved)
     
     def _show_filter(self):
-        FilterWindow(self, self.filter_settings, self._on_filter_saved)
+        self._filter_window = FilterWindow(self, self.filter_settings, self._on_filter_saved)
     
     def _on_filter_saved(self):
         pass
