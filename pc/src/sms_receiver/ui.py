@@ -677,6 +677,15 @@ class AddRuleDialog(ctk.CTkToplevel):
         )
         self.copy_entry.grid(row=0, column=1, sticky="ew")
         
+        self.copy_hint_label = ctk.CTkLabel(
+            copy_frame,
+            text="当前模式将拷贝整条消息",
+            font=ctk.CTkFont(size=13),
+            text_color=("#666666", "#888888"),
+            height=36,
+            anchor="w"
+        )
+        
         hint_label = ctk.CTkLabel(
             form_frame,
             text="示例：验证码.*?(\\d{6}) 可从\"验证码是：123456\"中提取\"123456\"",
@@ -729,11 +738,11 @@ class AddRuleDialog(ctk.CTkToplevel):
     
     def _update_copy_entry_state(self):
         if self.copy_type_var.get() == "full":
-            self.copy_entry.configure(state="normal")
-            self.copy_entry.delete(0, "end")
-            self.copy_entry.configure(placeholder_text="当前模式将拷贝整条消息", state="disabled")
+            self.copy_entry.grid_remove()
+            self.copy_hint_label.grid(row=0, column=1, sticky="ew")
         else:
-            self.copy_entry.configure(state="normal", placeholder_text="输入正则表达式提取内容")
+            self.copy_hint_label.grid_remove()
+            self.copy_entry.grid(row=0, column=1, sticky="ew")
     
     def _on_save(self):
         name = self.name_entry.get().strip()
