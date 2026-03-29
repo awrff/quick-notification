@@ -669,13 +669,8 @@ class AddRuleDialog(ctk.CTkToplevel):
         )
         copy_type_seg.grid(row=0, column=0, padx=(0, 8))
         
-        self.copy_entry = ctk.CTkEntry(
-            copy_frame,
-            placeholder_text="输入正则表达式提取内容",
-            height=36,
-            corner_radius=8
-        )
-        self.copy_entry.grid(row=0, column=1, sticky="ew")
+        self.copy_frame = copy_frame
+        self.copy_entry = None
         
         self.copy_hint_label = ctk.CTkLabel(
             copy_frame,
@@ -728,22 +723,33 @@ class AddRuleDialog(ctk.CTkToplevel):
             self.filter_type_var.set(self.rule.filter_type)
             copy_type = self.rule.copy_type if self.rule.copy_type in ["full", "regex"] else "full"
             self.copy_type_var.set(copy_type)
-            if copy_type == "regex":
+            self._update_copy_entry_state()
+            if copy_type == "regex" and self.copy_entry:
                 self.copy_entry.insert(0, self.rule.copy_pattern)
-        
-        self._update_copy_entry_state()
+        else:
+            self._update_copy_entry_state()
     
     def _on_copy_type_change(self, value):
         self._update_copy_entry_state()
     
     def _update_copy_entry_state(self):
         if self.copy_type_var.get() == "full":
-            self.copy_entry.grid_remove()
+            if self.copy_entry:
+                self.copy_entry.destroy()
+                self.copy_entry = None
             self.copy_hint_label.grid(row=0, column=1, sticky="ew")
         else:
             self.copy_hint_label.grid_remove()
+            if self.copy_entry:
+                self.copy_entry.destroy()
+            self.copy_entry = ctk.CTkEntry(
+                self.copy_frame,
+                placeholder_text="输入正则表达式提取内容",
+                height=36,
+                corner_radius=8
+            )
             self.copy_entry.grid(row=0, column=1, sticky="ew")
-    
+
     def _on_save(self):
         name = self.name_entry.get().strip()
         filter_pattern = self.filter_entry.get().strip()
