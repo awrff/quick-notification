@@ -56,6 +56,8 @@ class QuickNotificationApp(ctk.CTk):
         self.tray_icon = None
         self.is_hidden = False
         
+        self._setup_thread_safe_events()
+        
         self.server = SMSServer(
             on_message=self._on_new_message,
             on_device_connected=self._on_device_connected,
@@ -69,6 +71,25 @@ class QuickNotificationApp(ctk.CTk):
         self._setup_tray()
         
         self.protocol("WM_DELETE_WINDOW", self._on_closing)
+    
+    def _setup_thread_safe_events(self):
+        self._pending_callbacks = {}
+        self._callback_id = 0
+        
+        self.bind("<<ThreadCallback>>", self._process_thread_callback)
+    
+    def _schedule_callback(self, callback):
+        self._callback_id += 1
+        callback_id = self._callback_id
+        self._pending_callbacks[callback_id] = callback
+        self.event_generate("<<ThreadCallback>>")
+        return callback_id
+    
+    def _process_thread_callback(self, event):
+        callbacks_to_process = list(self._pending_callbacks.values())
+        self._pending_callbacks.clear()
+        for callback in callbacks_to_process:
+            callback()
     
     def _center_window(self):
         self.update_idletasks()
@@ -297,25 +318,25 @@ class QuickNotificationApp(ctk.CTk):
         
         auto_copied = False
         if self.config.auto_copy:
-            self.after(0, lambda c=content: self._copy_to_clipboard(c))
+            self._schedule_callback(lambda c=content: self._copy_to_clipboard(c))
             auto_copied = True
         
-        self.after(0, lambda: self._add_message_card(message, scroll_to_top=True))
+        self._schedule_callback(lambda: self._add_message_card(message, scroll_to_top=True))
         
         if self.config.popup_notification:
-            self.after(0, lambda: self._show_popup(sender, content, timestamp, auto_copied))
+            self._schedule_callback(lambda: self._show_popup(sender, content, timestamp, auto_copied))
     
     def _on_device_connected(self, device: str):
         self.connected_device = device
         ip = device.split(':')[0]
-        self.after(0, lambda: self._update_device_status(f"设备已连接 ({ip})", True))
+        self._schedule_callback(lambda: self._update_device_status(f"设备已连接 ({ip})", True))
     
     def _on_device_disconnected(self):
         self.connected_device = None
-        self.after(0, lambda: self._update_device_status("等待设备连接", False))
+        self._schedule_callback(lambda: self._update_device_status("等待设备连接", False))
     
     def _on_status_update(self, status: str, is_ok: bool):
-        self.after(0, lambda: self._update_status(status, is_ok))
+        self._schedule_callback(lambda: self._update_status(status, is_ok))
     
     def _copy_to_clipboard(self, content: str):
         self.clipboard_clear()
