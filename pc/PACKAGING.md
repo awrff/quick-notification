@@ -11,7 +11,19 @@ uv venv
 uv pip install -e .
 ```
 
-### 2. 安装 Inno Setup（用于生成安装程序）
+### 2. 安装开发依赖（可选，用于运行测试）
+
+```powershell
+uv pip install -e ".[dev]"
+```
+
+### 3. 运行测试
+
+```powershell
+uv run pytest tests/ -v
+```
+
+### 4. 安装 Inno Setup（用于生成安装程序）
 
 从官网下载并安装：https://jrsoftware.org/isdl.php
 
