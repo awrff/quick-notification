@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.quicknotification"
+    namespace = "com.jayden.quicknotification"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.quicknotification"
+        applicationId = "com.jayden.quicknotification"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

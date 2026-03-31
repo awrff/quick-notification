@@ -1,4 +1,4 @@
-package com.quicknotification
+package com.jayden.quicknotification
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -19,9 +19,9 @@ import java.net.URI
 class WebSocketService : Service() {
     
     companion object {
-        const val ACTION_CONNECT = "com.quicknotification.CONNECT"
-        const val ACTION_SEND_SMS = "com.quicknotification.SEND_SMS"
-        const val ACTION_DISCONNECT = "com.quicknotification.DISCONNECT"
+        const val ACTION_CONNECT = "com.jayden.quicknotification.CONNECT"
+        const val ACTION_SEND_SMS = "com.jayden.quicknotification.SEND_SMS"
+        const val ACTION_DISCONNECT = "com.jayden.quicknotification.DISCONNECT"
         const val EXTRA_SERVER_ADDRESS = "server_address"
         const val EXTRA_SMS_DATA = "sms_data"
         

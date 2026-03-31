@@ -1,4 +1,4 @@
-package com.quicknotification
+package com.jayden.quicknotification
 
 import android.content.BroadcastReceiver
 import android.content.Context

@@ -1,4 +1,4 @@
-package com.quicknotification
+package com.jayden.quicknotification
 
 import android.Manifest
 import android.content.ClipData
