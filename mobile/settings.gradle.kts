@@ -18,5 +18,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SMSForwarder"
+rootProject.name = "QuickNotification"
 include("app")

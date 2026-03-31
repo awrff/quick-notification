@@ -30,7 +30,7 @@ quick-notification/
         ├── proguard-rules.pro       # 混淆规则
         └── src/main/
             ├── AndroidManifest.xml  # 清单文件
-            ├── java/com/smsforwarder/
+            ├── java/com/quicknotification/
             │   ├── MainActivity.kt      # 主界面 - 服务器扫描和连接
             │   ├── SmsReceiver.kt       # 短信广播接收器 - 监听系统短信
             │   ├── SmsData.kt           # 数据模型 - JSON序列化

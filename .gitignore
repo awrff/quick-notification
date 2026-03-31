@@ -19,6 +19,7 @@ local.properties
 mobile/.idea/
 mobile/build/
 mobile/app/build/
+mobile/app/release/
 mobile/app/.cxx/
 mobile/app/.externalNativeBuild/
 mobile/app/tmp/

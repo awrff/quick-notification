@@ -1,4 +1,4 @@
-package com.smsforwarder
+package com.quicknotification
 
 import com.google.gson.Gson
 

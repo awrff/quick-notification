@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.smsforwarder"
+    namespace = "com.quicknotification"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.smsforwarder"
+        applicationId = "com.quicknotification"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
