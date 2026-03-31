@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.SMSForwarder" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.QuickNotification" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <item name="colorPrimary">@color/button_connect_bg</item>
         <item name="colorPrimaryVariant">@color/button_connect_ripple</item>
         <item name="colorOnPrimary">@android:color/white</item>

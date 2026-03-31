@@ -1,4 +1,4 @@
-package com.smsforwarder
+package com.quicknotification
 
 import android.Manifest
 import android.content.ClipData

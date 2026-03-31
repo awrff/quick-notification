@@ -1,4 +1,4 @@
-package com.smsforwarder
+package com.quicknotification
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -19,9 +19,9 @@ import java.net.URI
 class WebSocketService : Service() {
     
     companion object {
-        const val ACTION_CONNECT = "com.smsforwarder.CONNECT"
-        const val ACTION_SEND_SMS = "com.smsforwarder.SEND_SMS"
-        const val ACTION_DISCONNECT = "com.smsforwarder.DISCONNECT"
+        const val ACTION_CONNECT = "com.quicknotification.CONNECT"
+        const val ACTION_SEND_SMS = "com.quicknotification.SEND_SMS"
+        const val ACTION_DISCONNECT = "com.quicknotification.DISCONNECT"
         const val EXTRA_SERVER_ADDRESS = "server_address"
         const val EXTRA_SMS_DATA = "sms_data"
         
