@@ -1,5 +1,7 @@
 # Quick Notification
 
+[Quick Notification - 跨平台短信转发](https://www.jaydendev.cloud/quick-notification/)
+
 一个跨平台短信转发应用，支持安卓端自动捕获短信并转发到PC端显示。
 
 ## 项目结构
